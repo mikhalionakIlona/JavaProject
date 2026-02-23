@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD Suppressions 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <suppress checks="Javadoc.*|MissingJavadoc.*" files=".*"/>
+
+    <suppress checks="AbbreviationAsWordInName" 
+              files=".*" 
+              message=".*'ID'.*"/>
+    <suppress checks="AbbreviationAsWordInName" 
+              files=".*" 
+              message=".*'DTO'.*"/>
+    <suppress checks="AbbreviationAsWordInName" 
+              files=".*" 
+              message=".*'API'.*"/>
+    <suppress checks="AbbreviationAsWordInName" 
+              files=".*" 
+              message=".*'URL'.*"/>
+    <suppress checks="AbbreviationAsWordInName" 
+              files=".*" 
+              message=".*'XML'.*"/>
+    <suppress checks="AbbreviationAsWordInName" 
+              files=".*" 
+              message=".*'HTML'.*"/>
+    
+    <suppress checks="LineLength" files=".*Test\.java"/>
+
+    <suppress checks=".*" files=".*[\\/]generated[\\/].*"/>
+</suppressions>
