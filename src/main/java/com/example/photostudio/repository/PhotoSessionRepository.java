@@ -1,11 +1,13 @@
 package com.example.photostudio.repository;
 
-import com.example.photostudio.model.PhotoSession;
-import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.springframework.stereotype.Repository;
+
+import com.example.photostudio.model.PhotoSession;
 
 @Repository
 public final class PhotoSessionRepository {
@@ -95,18 +97,6 @@ public final class PhotoSessionRepository {
     public List<PhotoSession> findByClientName(String clientName) {
         return storage.stream()
                 .filter(session -> session.getClientName().equalsIgnoreCase(clientName))
-                .toList();
-    }
-
-    public List<PhotoSession> findByStatus(String status) {
-        return storage.stream()
-                .filter(session -> session.getStatus().equalsIgnoreCase(status))
-                .toList();
-    }
-
-    public List<PhotoSession> findByPhotographer(String photographer) {
-        return storage.stream()
-                .filter(session -> session.getPhotographer().equalsIgnoreCase(photographer))
                 .toList();
     }
 }
