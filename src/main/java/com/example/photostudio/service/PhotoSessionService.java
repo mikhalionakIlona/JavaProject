@@ -35,13 +35,6 @@ public final class PhotoSessionService {
                 .toList();
     }
 
-    public List<PhotoSessionAdminResponseDto> getAllPhotoSessionForAdmin() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toAdminResponseDto)
-                .toList();
-    }
-
     public PhotoSessionAdminResponseDto getPhotoSessionForAdminById(Long id) {
         PhotoSession photoSession = repository.findById(id);
         return mapper.toAdminResponseDto(photoSession);

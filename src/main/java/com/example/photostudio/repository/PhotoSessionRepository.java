@@ -40,15 +40,6 @@ public final class PhotoSessionRepository {
                 .photographer("Ковалькова Ирина")
                 .status("Запланирована")
                 .build());
-        save(PhotoSession.builder()
-                .clientLastName("Тасуханов")
-                .clientName("Максим")
-                .clientPhone("+375(29)741-52-37")
-                .photoSessionDate(LocalDateTime.now().plusDays(1))
-                .price(65)
-                .photographer("Солонович Анна")
-                .status("Завершина")
-                .build());
     }
 
     public PhotoSession save(PhotoSession photoSession) {

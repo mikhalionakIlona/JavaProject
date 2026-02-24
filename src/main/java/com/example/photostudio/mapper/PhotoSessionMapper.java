@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PhotoSessionMapper {
-    
+
     public PhotoSessionResponseDto toResponseDto(PhotoSession photoSession) {
         if (photoSession == null) {
             return null;
@@ -68,22 +68,5 @@ public class PhotoSessionMapper {
         photoSession.setPhotographer(dto.getPhotographer());
         photoSession.setPrice(dto.getPrice());
         photoSession.setStatus(dto.getStatus());
-    }
-
-    public PhotoSession toEntityFromAdmin(PhotoSessionAdminResponseDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        return PhotoSession.builder()
-                .id(dto.getId())
-                .clientLastName(dto.getClientLastName())
-                .clientName(dto.getClientName())
-                .clientPhone(dto.getClientPhone())
-                .photoSessionDate(dto.getPhotoSessionDate())
-                .photographer(dto.getPhotographer())
-                .price(dto.getPrice())
-                .status(dto.getStatus())
-                .build();
     }
 }
