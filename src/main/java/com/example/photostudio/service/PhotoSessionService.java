@@ -6,13 +6,13 @@ import com.example.photostudio.dto.PhotoSessionResponseDto;
 import com.example.photostudio.mapper.PhotoSessionMapper;
 import com.example.photostudio.model.PhotoSession;
 import com.example.photostudio.repository.PhotoSessionRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PhotoSessionService {
+public final class PhotoSessionService {
     private final PhotoSessionMapper mapper;
     private final PhotoSessionRepository repository;
 
@@ -47,14 +47,6 @@ public class PhotoSessionService {
         return mapper.toAdminResponseDto(photoSession);
     }
 
-    public List<PhotoSessionAdminResponseDto> 
-        getPhotoSessionForAdminClientFullName(String clientLastName, String clientName) {
-        return repository.findByFirstNameAndLastName(clientName, clientLastName)
-                .stream()
-                .map(mapper::toAdminResponseDto)
-                .toList();
-    }
-
     public boolean deletePhotoSession(Long id) {
         if (repository.existById(id)) {
             repository.deleteById(id);
@@ -78,16 +70,5 @@ public class PhotoSessionService {
         mapper.updateEntity(existingPhotoSession, requestDto);
         PhotoSession updatePhotoSession = repository.save(existingPhotoSession);
         return mapper.toResponseDto(updatePhotoSession);
-    }
-
-    public PhotoSessionAdminResponseDto 
-        updatePhotoSessionFormAdmin(Long id, PhotoSessionAdminResponseDto adminDto) {
-        if (!id.equals(adminDto.getId())) {
-            return null;
-        }
-
-        PhotoSession photoSession = mapper.toEntityFromAdmin(adminDto);
-        PhotoSession updatePhotoSession = repository.save(photoSession);
-        return mapper.toAdminResponseDto(updatePhotoSession);
     }
 }

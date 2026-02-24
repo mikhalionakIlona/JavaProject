@@ -1,13 +1,11 @@
 package com.example.photostudio.repository;
 
+import com.example.photostudio.model.PhotoSession;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.stereotype.Repository;
-
-import com.example.photostudio.model.PhotoSession;
 
 @Repository
 public final class PhotoSessionRepository {
@@ -85,13 +83,6 @@ public final class PhotoSessionRepository {
 
     public boolean existById(Long id) {
         return storage.stream().anyMatch(session -> session.getId().equals(id));
-    }
-
-    public List<PhotoSession> findByFirstNameAndLastName(String clientName, String clientLastName) {
-        return storage.stream()
-                .filter(session -> session.getClientLastName().equalsIgnoreCase(clientLastName)
-                        && session.getClientName().equalsIgnoreCase(clientName))
-                .toList();
     }
 
     public List<PhotoSession> findByClientName(String clientName) {
