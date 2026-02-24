@@ -1,3 +1,4 @@
 # 📌 Тема: Разработка REST API для управления фотосессиями
-* Проект предоставляет функционал для создания, просмотра, обновления и удаления информации о фотосессиях с разграничением прав доступа (обычные пользователи и администраторы).
- Ссылка на Sonar Cloud - https://sonarcloud.io/summary/new_code?id=mikhalionakIlona_JavaProject&branch=main
+# 🎯 Цель работы
+* Разработать базовое REST API приложение для управления задачами, проектами и пользователями с использованием Spring Boot
+Ссылка на Sonar Cloud - https://sonarcloud.io/summary/new_code?id=mikhalionakIlona_JavaProject&branch=main
