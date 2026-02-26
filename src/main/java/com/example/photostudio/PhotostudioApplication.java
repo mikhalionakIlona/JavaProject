@@ -6,6 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class PhotostudioApplication {
     public static void main(String[] args) {
-        SpringApplication.run(PhotostudioApplication.class, args); //олт
+        SpringApplication.run(PhotostudioApplication.class, args); //олтhvgfj
     }
 }
