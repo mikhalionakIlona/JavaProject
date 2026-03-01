@@ -1,72 +1,60 @@
 package com.example.photostudio.mapper;
 
-import com.example.photostudio.dto.PhotoSessionAdminResponseDto;
-import com.example.photostudio.dto.PhotoSessionRequestDto;
-import com.example.photostudio.dto.PhotoSessionResponseDto;
+import com.example.photostudio.dto.PhotoSessionDto;
 import com.example.photostudio.model.PhotoSession;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PhotoSessionMapper {
 
-    public PhotoSessionResponseDto toResponseDto(PhotoSession photoSession) {
-        if (photoSession == null) {
+    public PhotoSessionDto toDto(PhotoSession session) {
+        if (session == null) {
             return null;
         }
 
-        return new PhotoSessionResponseDto(
-                photoSession.getId(),
-                photoSession.getClientName(),
-                photoSession.getPhotoSessionDate(),
-                photoSession.getPrice(),
-                photoSession.getPhotographer(),
-                photoSession.getStatus());
-    }
-
-    public PhotoSessionAdminResponseDto toAdminResponseDto(PhotoSession photoSession) {
-        if (photoSession == null) {
-            return null;
-        }
-
-        return PhotoSessionAdminResponseDto.builder()
-                .id(photoSession.getId())
-                .clientName(photoSession.getClientName())
-                .clientLastName(photoSession.getClientLastName())
-                .clientPhone(photoSession.getClientPhone())
-                .photoSessionDate(photoSession.getPhotoSessionDate())
-                .price(photoSession.getPrice())
-                .photographer(photoSession.getPhotographer())
-                .status(photoSession.getStatus())
+        return PhotoSessionDto.builder()
+                .id(session.getId())
+                .clientName(session.getClientName())
+                .clientLastName(session.getClientLastName())
+                .clientPhone(session.getClientPhone())
+                .photoSessionDate(session.getPhotoSessionDate())
+                .price(session.getPrice())
+                .photographer(session.getPhotographer())
+                .status(session.getStatus())
+                .clientId(session.getClient() != null ? session.getClient().getId() : null)
+                .photographerId(session.getPhotographerEntity() != null ? session.getPhotographerEntity().getId() :
+                        null)
+                .serviceId(session.getService() != null ? session.getService().getId() : null)
                 .build();
     }
 
-    public PhotoSession toEntity(PhotoSessionRequestDto dto) {
+    public PhotoSession toEntity(PhotoSessionDto dto) {
         if (dto == null) {
             return null;
         }
 
         return PhotoSession.builder()
-                .clientLastName(dto.getClientLastName())
                 .clientName(dto.getClientName())
+                .clientLastName(dto.getClientLastName())
                 .clientPhone(dto.getClientPhone())
                 .photoSessionDate(dto.getPhotoSessionDate())
-                .photographer(dto.getPhotographer())
                 .price(dto.getPrice())
+                .photographer(dto.getPhotographer())
                 .status(dto.getStatus())
                 .build();
     }
 
-    public void updateEntity(PhotoSession photoSession, PhotoSessionRequestDto dto) {
-        if (photoSession == null || dto == null) {
+    public void updateEntity(PhotoSession session, PhotoSessionDto dto) {
+        if (session == null || dto == null) {
             return;
         }
 
-        photoSession.setClientLastName(dto.getClientLastName());
-        photoSession.setClientName(dto.getClientName());
-        photoSession.setClientPhone(dto.getClientPhone());
-        photoSession.setPhotoSessionDate(dto.getPhotoSessionDate());
-        photoSession.setPhotographer(dto.getPhotographer());
-        photoSession.setPrice(dto.getPrice());
-        photoSession.setStatus(dto.getStatus());
+        session.setClientName(dto.getClientName());
+        session.setClientLastName(dto.getClientLastName());
+        session.setClientPhone(dto.getClientPhone());
+        session.setPhotoSessionDate(dto.getPhotoSessionDate());
+        session.setPrice(dto.getPrice());
+        session.setPhotographer(dto.getPhotographer());
+        session.setStatus(dto.getStatus());
     }
 }

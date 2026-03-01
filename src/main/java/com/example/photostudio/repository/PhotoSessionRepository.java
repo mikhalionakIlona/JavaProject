@@ -1,84 +1,30 @@
 package com.example.photostudio.repository;
 
 import com.example.photostudio.model.PhotoSession;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 @Repository
-public final class PhotoSessionRepository {
-    private final List<PhotoSession> storage = new ArrayList<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+public interface PhotoSessionRepository extends JpaRepository<PhotoSession, Long> {
 
-    public PhotoSessionRepository() {
-        save(PhotoSession.builder()
-                .clientLastName("Михалёнок")
-                .clientName("Илона")
-                .clientPhone("+375(29)155-00-37")
-                .photoSessionDate(LocalDateTime.now().plusDays(1))
-                .price(50)
-                .photographer("Иванов Иван")
-                .status("Отменена")
-                .build());
-        save(PhotoSession.builder()
-                .clientLastName("Петрова")
-                .clientName("Катя")
-                .clientPhone("+375(44)185-25-69")
-                .photoSessionDate(LocalDateTime.now().plusDays(1))
-                .price(60)
-                .photographer("Иванов Иван")
-                .status("Запланирована")
-                .build());
-        save(PhotoSession.builder()
-                .clientLastName("Сурма")
-                .clientName("Таисия")
-                .clientPhone("+375(29)887-40-65")
-                .photoSessionDate(LocalDateTime.now().plusDays(1))
-                .price(80)
-                .photographer("Ковалькова Ирина")
-                .status("Запланирована")
-                .build());
-    }
+    List<PhotoSession> findByClientNameIgnoreCase(String clientName);
 
-    public PhotoSession save(PhotoSession photoSession) {
-        if (photoSession.getId() == null) {
-            photoSession.setId(idGenerator.getAndIncrement());
-            storage.add(photoSession);
-        } else {
-            for (int i = 0; i < storage.size(); i++) {
-                if (storage.get(i).getId().equals(photoSession.getId())) {
-                    storage.set(i, photoSession);
-                    break;
-                }
-            }
-        }
-        return photoSession;
-    }
+    // Демонстрация N+1 проблемы
+    @Query("SELECT ps FROM PhotoSession ps")
+    List<PhotoSession> findAllWithoutFetch();
 
-    public List<PhotoSession> findAll() {
-        return new ArrayList<>(storage);
-    }
+    // Решение через JOIN FETCH
+    @Query("SELECT DISTINCT ps FROM PhotoSession ps " +
+            "LEFT JOIN FETCH ps.client " +
+            "LEFT JOIN FETCH ps.photographerEntity " +
+            "LEFT JOIN FETCH ps.service")
+    List<PhotoSession> findAllWithJoinFetch();
 
-    public PhotoSession findById(Long id) {
-        return storage.stream()
-                .filter(session -> session.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public void deleteById(Long id) {
-        storage.removeIf(photoSession -> photoSession.getId().equals(id));
-    }
-
-    public boolean existById(Long id) {
-        return storage.stream().anyMatch(session -> session.getId().equals(id));
-    }
-
-    public List<PhotoSession> findByClientName(String clientName) {
-        return storage.stream()
-                .filter(session -> session.getClientName().equalsIgnoreCase(clientName))
-                .toList();
-    }
+    // Решение через EntityGraph
+    @EntityGraph(attributePaths = {"client", "photographerEntity", "service"})
+    @Query("SELECT ps FROM PhotoSession ps")
+    List<PhotoSession> findAllWithEntityGraph();
 }

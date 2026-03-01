@@ -1,9 +1,7 @@
 package com.example.photostudio.controller;
 
-import com.example.photostudio.dto.PhotoSessionRequestDto;
-import com.example.photostudio.dto.PhotoSessionResponseDto;
+import com.example.photostudio.dto.PhotoSessionDto;
 import com.example.photostudio.service.PhotoSessionService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,55 +15,78 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/photoSession")
+@RequestMapping("/api/sessions")
 @RequiredArgsConstructor
-public final class PhotoSessionController {
-     private final PhotoSessionService service;
+public class PhotoSessionController {
+    private final PhotoSessionService service;
 
+    // GET с @RequestParam
     @GetMapping
-    public ResponseEntity<List<PhotoSessionResponseDto>> getPhotosessions(
+    public ResponseEntity<List<PhotoSessionDto>> getSessions(
             @RequestParam(value = "client", required = false) String clientName) {
-        List<PhotoSessionResponseDto> photoSessions = (clientName != null &&
-            !clientName.trim().isEmpty())
-                ? service.getPhotoSessionByClientName(clientName)
-                : service.getAllPhotoSessions();
-
-        return ResponseEntity.ok(photoSessions);
+        return ResponseEntity.ok(service.getAllPhotoSessions(clientName));
     }
 
+    // GET с @PathVariable
     @GetMapping("/{id}")
-    public ResponseEntity<PhotoSessionResponseDto> getPhotoSessionById(@PathVariable Long id) {
-        PhotoSessionResponseDto photoSession = service.getPhotoSessionById(id);
-
-        return photoSession == null
-                ? ResponseEntity.notFound().build()
-                : ResponseEntity.ok(photoSession);
+    public ResponseEntity<PhotoSessionDto> getSessionById(@PathVariable Long id) {
+        PhotoSessionDto session = service.getPhotoSessionById(id);
+        return session == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(session);
     }
 
+    // CRUD
     @PostMapping
-    public ResponseEntity<PhotoSessionResponseDto> createPhotoSession(
-            @RequestBody PhotoSessionRequestDto requestDto) {
-        PhotoSessionResponseDto createdPhotoSession = service.createPhotoSession(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdPhotoSession);
+    public ResponseEntity<PhotoSessionDto> createSession(@RequestBody PhotoSessionDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createPhotoSession(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PhotoSessionResponseDto> updatePhotoSession(
-            @PathVariable Long id,
-            @RequestBody PhotoSessionRequestDto requestDto) {
-        PhotoSessionResponseDto updatedPhotoSession = service.updatePhotoSession(id, requestDto);
-        return updatedPhotoSession == null
-                ? ResponseEntity.notFound().build()
-                : ResponseEntity.ok(updatedPhotoSession);
+    public ResponseEntity<PhotoSessionDto> updateSession(@PathVariable Long id,
+                                                         @RequestBody PhotoSessionDto dto) {
+        PhotoSessionDto updated = service.updatePhotoSession(id, dto);
+        return updated == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePhotoSession(@PathVariable Long id) {
-        boolean deleted = service.deletePhotoSession(id);
-        return deleted
+    public ResponseEntity<Void> deleteSession(@PathVariable Long id) {
+        return service.deletePhotoSession(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
+    }
+
+    // Демонстрация N+1 и решений
+    @GetMapping("/nplus1")
+    public ResponseEntity<List<PhotoSessionDto>> getWithNPlus1() {
+        return ResponseEntity.ok(service.getAllWithNPlus1());
+    }
+
+    @GetMapping("/join-fetch")
+    public ResponseEntity<List<PhotoSessionDto>> getWithJoinFetch() {
+        return ResponseEntity.ok(service.getAllWithJoinFetch());
+    }
+
+    @GetMapping("/entity-graph")
+    public ResponseEntity<List<PhotoSessionDto>> getWithEntityGraph() {
+        return ResponseEntity.ok(service.getAllWithEntityGraph());
+    }
+
+    // Демонстрация транзакций
+    @PostMapping("/no-tx")
+    public ResponseEntity<PhotoSessionDto> createNoTransaction(@RequestBody PhotoSessionDto dto,
+                                                               @RequestParam Long clientId,
+                                                               @RequestParam Long photographerId,
+                                                               @RequestParam Long serviceId) {
+        return ResponseEntity.ok(service.createWithRelatedNoTransaction(dto, clientId, photographerId, serviceId));
+    }
+
+    @PostMapping("/with-tx")
+    public ResponseEntity<PhotoSessionDto> createWithTransaction(@RequestBody PhotoSessionDto dto,
+                                                                 @RequestParam Long clientId,
+                                                                 @RequestParam Long photographerId,
+                                                                 @RequestParam Long serviceId) {
+        return ResponseEntity.ok(service.createWithRelatedWithTransaction(dto, clientId, photographerId, serviceId));
     }
 }
