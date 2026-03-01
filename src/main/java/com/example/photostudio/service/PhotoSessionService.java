@@ -200,7 +200,6 @@ public class PhotoSessionService {
             } catch (Exception e) {
                 LOGGER.warn("Error setting reference for id: {} - {}", id, e.getMessage());
                 if (entitySupplier != null) {
-                    // Вызываем supplier для проверки существования, но не сохраняем результат
                     entitySupplier.get();
                     LOGGER.debug("Verified entity existence for id: {}", id);
                 }

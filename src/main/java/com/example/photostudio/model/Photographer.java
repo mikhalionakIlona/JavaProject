@@ -43,5 +43,5 @@ public class Photographer {
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
     @Builder.Default
-    private List<PhotoService> services = new ArrayList<>(); // Изменено с Service на PhotoService
+    private List<PhotoService> services = new ArrayList<>();
 }

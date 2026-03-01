@@ -1,13 +1,13 @@
 package com.example.photostudio.mapper;
 
 import com.example.photostudio.dto.ServiceDto;
-import com.example.photostudio.model.PhotoService;  // Ваш класс модели
+import com.example.photostudio.model.PhotoService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceMapper {
 
-    public ServiceDto toDto(PhotoService service) {  // Service - это ваша модель
+    public ServiceDto toDto(PhotoService service) {
         if (service == null) {
             return null;
         }
