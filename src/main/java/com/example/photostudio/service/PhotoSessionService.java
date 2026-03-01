@@ -187,7 +187,6 @@ public class PhotoSessionService {
                             .orElseThrow(() -> new NoSuchElementException(
                                     "Service not found with id: " + serviceId)));
         }
-
         return session;
     }
 
