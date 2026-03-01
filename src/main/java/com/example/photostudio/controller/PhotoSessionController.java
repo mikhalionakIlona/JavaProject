@@ -3,7 +3,6 @@ package com.example.photostudio.controller;
 import com.example.photostudio.dto.PhotoSessionDto;
 import com.example.photostudio.service.PhotoSessionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,75 +17,66 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sessions")
+@RequestMapping("/api/photo-sessions")
 @RequiredArgsConstructor
 public class PhotoSessionController {
-    private final PhotoSessionService service;
+    private final PhotoSessionService photoSessionService;
 
-    // GET с @RequestParam
     @GetMapping
-    public ResponseEntity<List<PhotoSessionDto>> getSessions(
-            @RequestParam(value = "client", required = false) String clientName) {
-        return ResponseEntity.ok(service.getAllPhotoSessions(clientName));
+    public List<PhotoSessionDto> getAllPhotoSessions(
+            @RequestParam(required = false) String clientName) {
+        return photoSessionService.getAllPhotoSessions(clientName);
     }
 
-    // GET с @PathVariable
     @GetMapping("/{id}")
-    public ResponseEntity<PhotoSessionDto> getSessionById(@PathVariable Long id) {
-        PhotoSessionDto session = service.getPhotoSessionById(id);
-        return session == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(session);
+    public ResponseEntity<PhotoSessionDto> getPhotoSessionById(@PathVariable Long id) {
+        PhotoSessionDto dto = photoSessionService.getPhotoSessionById(id);
+        return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }
 
-    // CRUD
     @PostMapping
-    public ResponseEntity<PhotoSessionDto> createSession(@RequestBody PhotoSessionDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createPhotoSession(dto));
+    public PhotoSessionDto createPhotoSession(@RequestBody PhotoSessionDto dto) {
+        return photoSessionService.createPhotoSession(dto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PhotoSessionDto> updateSession(@PathVariable Long id,
-                                                         @RequestBody PhotoSessionDto dto) {
-        PhotoSessionDto updated = service.updatePhotoSession(id, dto);
-        return updated == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(updated);
+    public ResponseEntity<PhotoSessionDto> updatePhotoSession(
+            @PathVariable Long id, @RequestBody PhotoSessionDto dto) {
+        PhotoSessionDto updated = photoSessionService.updatePhotoSession(id, dto);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSession(@PathVariable Long id) {
-        return service.deletePhotoSession(id)
+    public ResponseEntity<Void> deletePhotoSession(@PathVariable Long id) {
+        return photoSessionService.deletePhotoSession(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
 
-    // Демонстрация N+1 и решений
-    @GetMapping("/nplus1")
-    public ResponseEntity<List<PhotoSessionDto>> getWithNPlus1() {
-        return ResponseEntity.ok(service.getAllWithNPlus1());
+    @GetMapping("/demonstrate/nplus1")
+    public ResponseEntity<String> demonstrateNPlus1() {
+        photoSessionService.demonstrateNPlus1Problem();
+        return ResponseEntity.ok("N+1 проблема продемонстрирована. Проверьте логи.");
     }
 
-    @GetMapping("/join-fetch")
-    public ResponseEntity<List<PhotoSessionDto>> getWithJoinFetch() {
-        return ResponseEntity.ok(service.getAllWithJoinFetch());
+    @GetMapping("/demonstrate/entity-graph")
+    public ResponseEntity<String> demonstrateEntityGraph() {
+        photoSessionService.demonstrateEntityGraphSolution();
+        return ResponseEntity.ok("Решение с @EntityGraph продемонстрировано. Проверьте логи.");
     }
 
-    @GetMapping("/entity-graph")
-    public ResponseEntity<List<PhotoSessionDto>> getWithEntityGraph() {
-        return ResponseEntity.ok(service.getAllWithEntityGraph());
-    }
-
-    // Демонстрация транзакций
-    @PostMapping("/no-tx")
-    public ResponseEntity<PhotoSessionDto> createNoTransaction(@RequestBody PhotoSessionDto dto,
-                                                               @RequestParam Long clientId,
-                                                               @RequestParam Long photographerId,
-                                                               @RequestParam Long serviceId) {
-        return ResponseEntity.ok(service.createWithRelatedNoTransaction(dto, clientId, photographerId, serviceId));
-    }
-
-    @PostMapping("/with-tx")
-    public ResponseEntity<PhotoSessionDto> createWithTransaction(@RequestBody PhotoSessionDto dto,
-                                                                 @RequestParam Long clientId,
-                                                                 @RequestParam Long photographerId,
-                                                                 @RequestParam Long serviceId) {
-        return ResponseEntity.ok(service.createWithRelatedWithTransaction(dto, clientId, photographerId, serviceId));
+    @PostMapping("/demonstrate/with-transaction")
+    public ResponseEntity<PhotoSessionDto> demonstrateWithTransaction(
+            @RequestBody PhotoSessionDto dto,
+            @RequestParam Long clientId,
+            @RequestParam Long photographerId,
+            @RequestParam Long serviceId) {
+        try {
+            PhotoSessionDto result = photoSessionService.createWithRelatedWithTransaction(
+                    dto, clientId, photographerId, serviceId);
+            return ResponseEntity.ok(result);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }
