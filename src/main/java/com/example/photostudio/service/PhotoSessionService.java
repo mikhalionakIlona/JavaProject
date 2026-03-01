@@ -2,19 +2,18 @@ package com.example.photostudio.service;
 
 import com.example.photostudio.dto.PhotoSessionDto;
 import com.example.photostudio.mapper.PhotoSessionMapper;
-import com.example.photostudio.model.Client;
 import com.example.photostudio.model.PhotoSession;
-import com.example.photostudio.model.Photographer;
-import com.example.photostudio.model.PhotoService;
 import com.example.photostudio.repository.ClientRepository;
 import com.example.photostudio.repository.PhotoSessionRepository;
 import com.example.photostudio.repository.PhotographerRepository;
-import com.example.photostudio.repository.ServiceRepository; // Оставляем ServiceRepository
+import com.example.photostudio.repository.ServiceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.LongConsumer;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -23,20 +22,22 @@ public class PhotoSessionService {
     private final PhotoSessionMapper mapper;
     private final ClientRepository clientRepository;
     private final PhotographerRepository photographerRepository;
-    private final ServiceRepository serviceRepository; // Оставляем имя serviceRepository
+    private final ServiceRepository serviceRepository;
+
+    // Внедрение самого себя для корректной работы @Transactional
+    private final PhotoSessionService self;
 
     // GET с @RequestParam
     public List<PhotoSessionDto> getAllPhotoSessions(String clientName) {
+        List<PhotoSession> sessions;
+
         if (clientName != null && !clientName.isEmpty()) {
-            return repository.findByClientNameIgnoreCase(clientName)
-                    .stream()
-                    .map(mapper::toDto)
-                    .toList();
+            sessions = repository.findByClientNameIgnoreCase(clientName);
+        } else {
+            sessions = repository.findAll();
         }
-        return repository.findAll()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+
+        return mapToDtoList(sessions);
     }
 
     // GET с @PathVariable
@@ -48,19 +49,12 @@ public class PhotoSessionService {
 
     // CRUD operations
     public PhotoSessionDto createPhotoSession(PhotoSessionDto dto) {
-        PhotoSession session = mapper.toEntity(dto);
-        setRelatedEntities(session, dto);
-        PhotoSession saved = repository.save(session);
-        return mapper.toDto(saved);
+        return savePhotoSession(new PhotoSession(), dto);
     }
 
     public PhotoSessionDto updatePhotoSession(Long id, PhotoSessionDto dto) {
         return repository.findById(id)
-                .map(session -> {
-                    mapper.updateEntity(session, dto);
-                    setRelatedEntities(session, dto);
-                    return mapper.toDto(repository.save(session));
-                })
+                .map(session -> savePhotoSession(session, dto))
                 .orElse(null);
     }
 
@@ -74,90 +68,119 @@ public class PhotoSessionService {
 
     // Демонстрация N+1 проблемы
     public List<PhotoSessionDto> getAllWithNPlus1() {
-        return repository.findAllWithoutFetch()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+        return mapToDtoList(repository.findAllWithoutFetch());
     }
 
     // Решение через JOIN FETCH
     public List<PhotoSessionDto> getAllWithJoinFetch() {
-        return repository.findAllWithJoinFetch()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+        return mapToDtoList(repository.findAllWithJoinFetch());
     }
 
     // Решение через EntityGraph
     public List<PhotoSessionDto> getAllWithEntityGraph() {
-        return repository.findAllWithEntityGraph()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+        return mapToDtoList(repository.findAllWithEntityGraph());
     }
 
-    // Сохранение нескольких связанных сущностей БЕЗ @Transactional
-    public PhotoSessionDto createWithRelatedNoTransaction(PhotoSessionDto dto, Long clientId,
-                                                          Long photographerId, Long serviceId) {
-        PhotoSession session = mapper.toEntity(dto);
-
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new NoSuchElementException("Client not found with id: " + clientId));
-        Photographer photographer = photographerRepository.findById(photographerId)
-                .orElseThrow(() -> new NoSuchElementException("Photographer not found with id: " + photographerId));
-        PhotoService photoService = serviceRepository.findById(serviceId) // Используем serviceRepository.findById
-                .orElseThrow(() -> new NoSuchElementException("Service not found with id: " + serviceId));
-
-        session.setClient(client);
-        session.setPhotographerEntity(photographer);
-        session.setService(photoService);
-
-        PhotoSession saved = repository.save(session);
-
-        // Здесь может быть ошибка, данные сохранятся частично
-        if (saved.getPrice() > 1000) {
-            throw new IllegalStateException("Price too high: " + saved.getPrice());
-        }
-
-        return mapper.toDto(saved);
+    // Сохранение нескольких связанных сущностей БЕЗ @Transactional (для демонстрации)
+    public PhotoSessionDto createWithRelatedNoTransaction(PhotoSessionDto dto,
+                                                          Long clientId,
+                                                          Long photographerId,
+                                                          Long serviceId) {
+        return self.createWithRelatedInternal(dto, clientId, photographerId, serviceId);
     }
 
     // Сохранение нескольких связанных сущностей С @Transactional
     @Transactional
-    public PhotoSessionDto createWithRelatedWithTransaction(PhotoSessionDto dto, Long clientId,
-                                                            Long photographerId, Long serviceId) {
-        PhotoSession session = mapper.toEntity(dto);
+    public PhotoSessionDto createWithRelatedWithTransaction(PhotoSessionDto dto,
+                                                            Long clientId,
+                                                            Long photographerId,
+                                                            Long serviceId) {
+        return self.createWithRelatedInternal(dto, clientId, photographerId, serviceId);
+    }
 
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new NoSuchElementException("Client not found with id: " + clientId));
-        Photographer photographer = photographerRepository.findById(photographerId)
-                .orElseThrow(() -> new NoSuchElementException("Photographer not found with id: " + photographerId));
-        PhotoService photoService = serviceRepository.findById(serviceId) // Используем serviceRepository.findById
-                .orElseThrow(() -> new NoSuchElementException("Service not found with id: " + serviceId));
-
-        session.setClient(client);
-        session.setPhotographerEntity(photographer);
-        session.setService(photoService);
-
+    // Внутренний метод с общей логикой
+    private PhotoSessionDto createWithRelatedInternal(PhotoSessionDto dto,
+                                                      Long clientId,
+                                                      Long photographerId,
+                                                      Long serviceId) {
+        PhotoSession session = prepareSessionWithRelated(dto, clientId,
+                photographerId, serviceId);
         PhotoSession saved = repository.save(session);
 
-        // При ошибке всё откатится
-        if (saved.getPrice() > 1000) {
-            throw new IllegalStateException("Price too high: " + saved.getPrice());
-        }
+        // Валидация
+        validateSession(saved);
 
         return mapper.toDto(saved);
     }
 
+    // Вспомогательные приватные методы
+
+    private PhotoSessionDto savePhotoSession(PhotoSession session, PhotoSessionDto dto) {
+        mapper.updateEntity(session, dto);
+        setRelatedEntities(session, dto);
+        return mapper.toDto(repository.save(session));
+    }
+
+    private List<PhotoSessionDto> mapToDtoList(List<PhotoSession> sessions) {
+        return sessions.stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    private PhotoSession prepareSessionWithRelated(PhotoSessionDto dto,
+                                                   Long clientId,
+                                                   Long photographerId,
+                                                   Long serviceId) {
+        PhotoSession session = mapper.toEntity(dto);
+
+        setEntityIfPresent(clientId,
+                id -> session.setClient(clientRepository.getReferenceById(id)),
+                () -> clientRepository.findById(clientId)
+                        .orElseThrow(() -> new NoSuchElementException(
+                                "Client not found with id: " + clientId)));
+
+        setEntityIfPresent(photographerId,
+                id -> session.setPhotographerEntity(photographerRepository.getReferenceById(id)),
+                () -> photographerRepository.findById(photographerId)
+                        .orElseThrow(() -> new NoSuchElementException(
+                                "Photographer not found with id: " + photographerId)));
+
+        setEntityIfPresent(serviceId,
+                id -> session.setService(serviceRepository.getReferenceById(id)),
+                () -> serviceRepository.findById(serviceId)
+                        .orElseThrow(() -> new NoSuchElementException(
+                                "Service not found with id: " + serviceId)));
+
+        return session;
+    }
+
+    private void setEntityIfPresent(Long id,
+                                    LongConsumer referenceSetter,
+                                    Supplier<Object> entitySupplier) {
+        if (id != null) {
+            try {
+                referenceSetter.accept(id);
+            } catch (Exception e) {
+                if (entitySupplier != null) {
+                    entitySupplier.get();
+                }
+            }
+        }
+    }
+
+    private void validateSession(PhotoSession session) {
+        if (session.getPrice() > 1000) {
+            throw new IllegalStateException("Price too high: " + session.getPrice());
+        }
+    }
+
     private void setRelatedEntities(PhotoSession session, PhotoSessionDto dto) {
-        if (dto.getClientId() != null) {
-            session.setClient(clientRepository.getReferenceById(dto.getClientId()));
-        }
-        if (dto.getPhotographerId() != null) {
-            session.setPhotographerEntity(photographerRepository.getReferenceById(dto.getPhotographerId()));
-        }
-        if (dto.getServiceId() != null) {
-            session.setService(serviceRepository.getReferenceById(dto.getServiceId())); // Используем serviceRepository
-        }
+        setEntityIfPresent(dto.getClientId(),
+                id -> session.setClient(clientRepository.getReferenceById(id)), null);
+        setEntityIfPresent(dto.getPhotographerId(),
+                id -> session.setPhotographerEntity(photographerRepository.getReferenceById(id)),
+                null);
+        setEntityIfPresent(dto.getServiceId(),
+                id -> session.setService(serviceRepository.getReferenceById(id)), null);
     }
 }
