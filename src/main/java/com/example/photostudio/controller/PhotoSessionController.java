@@ -56,27 +56,38 @@ public class PhotoSessionController {
     @GetMapping("/demonstrate/nplus1")
     public ResponseEntity<String> demonstrateNPlus1() {
         photoSessionService.demonstrateNPlus1Problem();
-        return ResponseEntity.ok("N+1 проблема продемонстрирована. Проверьте логи.");
+        return ResponseEntity.ok("N+1 проблема продемонстрирована. Проверьте логи в консоли.");
     }
 
     @GetMapping("/demonstrate/entity-graph")
     public ResponseEntity<String> demonstrateEntityGraph() {
         photoSessionService.demonstrateEntityGraphSolution();
-        return ResponseEntity.ok("Решение с @EntityGraph продемонстрировано. Проверьте логи.");
+        return ResponseEntity.ok("Решение с EntityGraph продемонстрировано. Проверьте логи в консоли.");
+    }
+
+    @PostMapping("/demonstrate/without-transaction")
+    public ResponseEntity<String> createWithoutTransaction(@RequestBody PhotoSessionDto dto,
+                                                           @RequestParam Long clientId,
+                                                           @RequestParam Long photographerId,
+                                                           @RequestParam Long serviceId) {
+        try {
+            photoSessionService.createWithRelatedWithoutTransaction(dto, clientId, photographerId, serviceId);
+            return ResponseEntity.ok("Операция без транзакции выполнена успешно");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/demonstrate/with-transaction")
-    public ResponseEntity<PhotoSessionDto> demonstrateWithTransaction(
-            @RequestBody PhotoSessionDto dto,
-            @RequestParam Long clientId,
-            @RequestParam Long photographerId,
-            @RequestParam Long serviceId) {
+    public ResponseEntity<String> createWithTransaction(@RequestBody PhotoSessionDto dto,
+                                                        @RequestParam Long clientId,
+                                                        @RequestParam Long photographerId,
+                                                        @RequestParam Long serviceId) {
         try {
-            PhotoSessionDto result = photoSessionService.createWithRelatedWithTransaction(
-                    dto, clientId, photographerId, serviceId);
-            return ResponseEntity.ok(result);
+            photoSessionService.createWithRelatedWithTransaction(dto, clientId, photographerId, serviceId);
+            return ResponseEntity.ok("Операция с транзакцией выполнена успешно");
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
