@@ -1,16 +1,9 @@
 package com.example.photostudio.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PhotographerDto {
-    private Long id;
+public class PhotographerCreateDto {
     private String firstName;
     private String lastName;
     private String patronymic;

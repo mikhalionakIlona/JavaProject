@@ -28,13 +28,8 @@ public class PhotoSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String clientLastName;
-    private String clientName;
-    private String clientPhone;
-    private LocalDateTime photoSessionDate;
-    private double price;
-    private String photographer;
-    private String status;
+    private LocalDateTime sessionDate;
+    private Double totalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
@@ -42,7 +37,7 @@ public class PhotoSession {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photographer_id")
-    private Photographer photographerEntity;
+    private Photographer photographer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id")

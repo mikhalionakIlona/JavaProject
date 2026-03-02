@@ -10,12 +10,12 @@ import java.util.List;
 @Repository
 public interface PhotoSessionRepository extends JpaRepository<PhotoSession, Long> {
 
-    List<PhotoSession> findByClientNameIgnoreCase(String clientName);
+    List<PhotoSession> findByClientId(Long clientId);
 
     @Query("SELECT ps FROM PhotoSession ps")
     List<PhotoSession> findAllWithoutFetch();
 
-    @EntityGraph(attributePaths = {"client", "photographerEntity", "service"})
+    @EntityGraph(attributePaths = {"client", "photographer", "service"})
     @Query("SELECT ps FROM PhotoSession ps")
     List<PhotoSession> findAllWithEntityGraph();
 }

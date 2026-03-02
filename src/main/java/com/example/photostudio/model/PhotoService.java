@@ -1,6 +1,8 @@
 package com.example.photostudio.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,10 +27,9 @@ public class PhotoService {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String description;
-    private Double price;
-    private Integer durationMinutes;
+
+    @Enumerated(EnumType.STRING)
+    private ServiceType serviceType;
 
     @ManyToMany(mappedBy = "services", fetch = FetchType.LAZY)
     @Builder.Default

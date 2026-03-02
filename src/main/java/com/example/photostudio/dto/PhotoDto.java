@@ -15,7 +15,5 @@ public class PhotoDto {
     private String fileName;
     private String filePath;
     private LocalDateTime uploadDate;
-    private Integer size;
-    private Boolean isSelected;
     private Long sessionId;
 }

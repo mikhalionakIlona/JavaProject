@@ -12,14 +12,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PhotoSessionDto {
     private Long id;
+    private LocalDateTime sessionDate;
+    private Double totalPrice;
+    private Long clientId;
     private String clientName;
     private String clientLastName;
-    private String clientPhone;
-    private LocalDateTime photoSessionDate;
-    private Double price;
-    private String photographer;
-    private String status;
-    private Long clientId;
     private Long photographerId;
+    private String photographerName;
     private Long serviceId;
+    private String serviceName;
 }

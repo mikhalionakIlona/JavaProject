@@ -1,5 +1,6 @@
 package com.example.photostudio.dto;
 
+import com.example.photostudio.model.ServiceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ServiceDto {
     private Long id;
+    private ServiceType serviceType;
     private String name;
-    private String description;
-    private Double price;
-    private Integer durationMinutes;
 }

@@ -1,6 +1,8 @@
 package com.example.photostudio.controller;
 
 import com.example.photostudio.dto.PhotoSessionDto;
+import com.example.photostudio.dto.PhotoSessionCreateDto;
+import com.example.photostudio.dto.PhotoSessionUpdateDto;
 import com.example.photostudio.service.PhotoSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -23,9 +24,8 @@ public class PhotoSessionController {
     private final PhotoSessionService photoSessionService;
 
     @GetMapping
-    public List<PhotoSessionDto> getAllPhotoSessions(
-            @RequestParam(required = false) String clientName) {
-        return photoSessionService.getAllPhotoSessions(clientName);
+    public ResponseEntity<List<PhotoSessionDto>> getAllPhotoSessions() {
+        return ResponseEntity.ok(photoSessionService.getAllPhotoSessions());
     }
 
     @GetMapping("/{id}")
@@ -34,15 +34,20 @@ public class PhotoSessionController {
         return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<PhotoSessionDto>> getPhotoSessionsByClientId(@PathVariable Long clientId) {
+        return ResponseEntity.ok(photoSessionService.getPhotoSessionsByClientId(clientId));
+    }
+
     @PostMapping
-    public PhotoSessionDto createPhotoSession(@RequestBody PhotoSessionDto dto) {
-        return photoSessionService.createPhotoSession(dto);
+    public ResponseEntity<PhotoSessionDto> createPhotoSession(@RequestBody PhotoSessionCreateDto createDto) {
+        return ResponseEntity.ok(photoSessionService.createPhotoSession(createDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PhotoSessionDto> updatePhotoSession(
-            @PathVariable Long id, @RequestBody PhotoSessionDto dto) {
-        PhotoSessionDto updated = photoSessionService.updatePhotoSession(id, dto);
+            @PathVariable Long id, @RequestBody PhotoSessionUpdateDto updateDto) {
+        PhotoSessionDto updated = photoSessionService.updatePhotoSession(id, updateDto);
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
@@ -56,38 +61,32 @@ public class PhotoSessionController {
     @GetMapping("/demonstrate/nplus1")
     public ResponseEntity<String> demonstrateNPlus1() {
         photoSessionService.demonstrateNPlus1Problem();
-        return ResponseEntity.ok("N+1 проблема продемонстрирована. Проверьте логи в консоли.");
+        return ResponseEntity.ok("N+1 проблема продемонстрирована. Проверьте логи.");
     }
 
     @GetMapping("/demonstrate/entity-graph")
     public ResponseEntity<String> demonstrateEntityGraph() {
         photoSessionService.demonstrateEntityGraphSolution();
-        return ResponseEntity.ok("Решение с EntityGraph продемонстрировано. Проверьте логи в консоли.");
-    }
-
-    @PostMapping("/demonstrate/without-transaction")
-    public ResponseEntity<String> createWithoutTransaction(@RequestBody PhotoSessionDto dto,
-                                                           @RequestParam Long clientId,
-                                                           @RequestParam Long photographerId,
-                                                           @RequestParam Long serviceId) {
-        try {
-            photoSessionService.createWithRelatedWithoutTransaction(dto, clientId, photographerId, serviceId);
-            return ResponseEntity.ok("Операция без транзакции выполнена успешно");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok("Решение с EntityGraph продемонстрировано. Проверьте логи.");
     }
 
     @PostMapping("/demonstrate/with-transaction")
-    public ResponseEntity<String> createWithTransaction(@RequestBody PhotoSessionDto dto,
-                                                        @RequestParam Long clientId,
-                                                        @RequestParam Long photographerId,
-                                                        @RequestParam Long serviceId) {
+    public ResponseEntity<String> createWithTransaction(@RequestBody PhotoSessionCreateDto createDto) {
         try {
-            photoSessionService.createWithRelatedWithTransaction(dto, clientId, photographerId, serviceId);
+            photoSessionService.createWithRelatedWithTransaction(createDto);
             return ResponseEntity.ok("Операция с транзакцией выполнена успешно");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage() + " - транзакция откачена");
+        }
+    }
+
+    @PostMapping("/demonstrate/without-transaction")
+    public ResponseEntity<String> createWithoutTransaction(@RequestBody PhotoSessionCreateDto createDto) {
+        try {
+            photoSessionService.createWithRelatedWithoutTransaction(createDto);
+            return ResponseEntity.ok("Операция без транзакции выполнена успешно");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage() + " - данные сохранены в БД");
         }
     }
 }

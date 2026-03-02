@@ -12,49 +12,28 @@ public class PhotoSessionMapper {
             return null;
         }
 
-        return PhotoSessionDto.builder()
+        PhotoSessionDto.PhotoSessionDtoBuilder builder = PhotoSessionDto.builder()
                 .id(session.getId())
-                .clientName(session.getClientName())
-                .clientLastName(session.getClientLastName())
-                .clientPhone(session.getClientPhone())
-                .photoSessionDate(session.getPhotoSessionDate())
-                .price(session.getPrice())
-                .photographer(session.getPhotographer())
-                .status(session.getStatus())
-                .clientId(session.getClient() != null ? session.getClient().getId() : null)
-                .photographerId(session.getPhotographerEntity() != null ? session.getPhotographerEntity().getId() :
-                        null)
-                .serviceId(session.getService() != null ? session.getService().getId() : null)
-                .build();
-    }
+                .sessionDate(session.getSessionDate())
+                .totalPrice(session.getTotalPrice());
 
-    public PhotoSession toEntity(PhotoSessionDto dto) {
-        if (dto == null) {
-            return null;
+        if (session.getClient() != null) {
+            builder.clientId(session.getClient().getId())
+                    .clientName(session.getClient().getFirstName())
+                    .clientLastName(session.getClient().getLastName());
         }
 
-        return PhotoSession.builder()
-                .clientName(dto.getClientName())
-                .clientLastName(dto.getClientLastName())
-                .clientPhone(dto.getClientPhone())
-                .photoSessionDate(dto.getPhotoSessionDate())
-                .price(dto.getPrice())
-                .photographer(dto.getPhotographer())
-                .status(dto.getStatus())
-                .build();
-    }
-
-    public void updateEntity(PhotoSession session, PhotoSessionDto dto) {
-        if (session == null || dto == null) {
-            return;
+        if (session.getPhotographer() != null) {
+            builder.photographerId(session.getPhotographer().getId())
+                    .photographerName(session.getPhotographer().getFirstName() + " "
+                            + session.getPhotographer().getLastName());
         }
 
-        session.setClientName(dto.getClientName());
-        session.setClientLastName(dto.getClientLastName());
-        session.setClientPhone(dto.getClientPhone());
-        session.setPhotoSessionDate(dto.getPhotoSessionDate());
-        session.setPrice(dto.getPrice());
-        session.setPhotographer(dto.getPhotographer());
-        session.setStatus(dto.getStatus());
+        if (session.getService() != null) {
+            builder.serviceId(session.getService().getId())
+                    .serviceName(session.getService().getServiceType().getDisplayName()); // Из Enum!
+        }
+
+        return builder.build();
     }
 }

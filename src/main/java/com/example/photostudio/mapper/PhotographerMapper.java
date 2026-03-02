@@ -14,8 +14,9 @@ public class PhotographerMapper {
 
         return PhotographerDto.builder()
                 .id(photographer.getId())
-                .name(photographer.getName())
-                .specialization(photographer.getSpecialization())
+                .firstName(photographer.getFirstName())
+                .lastName(photographer.getLastName())
+                .patronymic(photographer.getPatronymic())
                 .phone(photographer.getPhone())
                 .hourlyRate(photographer.getHourlyRate())
                 .build();

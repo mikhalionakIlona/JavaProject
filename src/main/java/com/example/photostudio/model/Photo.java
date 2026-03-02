@@ -27,8 +27,6 @@ public class Photo {
     private String fileName;
     private String filePath;
     private LocalDateTime uploadDate;
-    private Integer size;
-    private Boolean isSelected;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id")

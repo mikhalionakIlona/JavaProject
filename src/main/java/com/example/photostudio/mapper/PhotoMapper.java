@@ -17,8 +17,6 @@ public class PhotoMapper {
                 .fileName(photo.getFileName())
                 .filePath(photo.getFilePath())
                 .uploadDate(photo.getUploadDate())
-                .size(photo.getSize())
-                .isSelected(photo.getIsSelected())
                 .sessionId(photo.getPhotoSession() != null ? photo.getPhotoSession().getId() : null)
                 .build();
     }

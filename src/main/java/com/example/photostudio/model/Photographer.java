@@ -27,12 +27,13 @@ public class Photographer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String specialization;
+    private String firstName;
+    private String lastName;
+    private String patronymic;
     private String phone;
     private Double hourlyRate;
 
-    @OneToMany(mappedBy = "photographerEntity", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY)
     @Builder.Default
     private List<PhotoSession> photoSessions = new ArrayList<>();
 
