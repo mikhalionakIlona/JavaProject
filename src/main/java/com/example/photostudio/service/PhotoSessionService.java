@@ -169,7 +169,6 @@ public class PhotoSessionService {
         LOG.info("Saved session id={} totalPrice={} ({})",
                 saved.getId(), saved.getTotalPrice(), type);
 
-        // Проверяем ID услуги - если serviceId = 3, вызываем ошибку
         if (dto.getServiceId() == 3) {
             String errorMessage = "Демонстрационная ошибка: услуга с ID=3 запрещена";
             LOG.error("{} DEMO - ERROR: {}", type, errorMessage);

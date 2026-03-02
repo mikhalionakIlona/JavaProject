@@ -42,7 +42,6 @@ public class PhotoServiceService {
         return repository.findById(id)
                 .map(service -> {
                     service.setServiceType(updateDto.getServiceType());
-                    // name больше не устанавливаем, берется из Enum
                     return mapper.toDto(repository.save(service));
                 })
                 .orElse(null);

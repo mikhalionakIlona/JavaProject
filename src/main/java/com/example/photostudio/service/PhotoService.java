@@ -51,7 +51,7 @@ public class PhotoService {
                 .fileName(fileName)
                 .filePath(filePath)
                 .uploadDate(LocalDateTime.now())
-                .photoSession(session)  // Устанавливаем связь с сессией
+                .photoSession(session)
                 .build();
 
         return mapper.toDto(repository.save(photo));
