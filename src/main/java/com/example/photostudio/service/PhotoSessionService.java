@@ -68,7 +68,7 @@ public class PhotoSessionService {
         PhotoService service = findServiceById(createDto.getServiceId());
 
         PhotoSession session = PhotoSession.builder()
-                .date(createDto.getSessionDate())
+                .date(createDto.getDate())
                 .client(client)
                 .photographer(photographer)
                 .service(service)
@@ -82,7 +82,7 @@ public class PhotoSessionService {
     public PhotoSessionDto updatePhotoSession(Long id, PhotoSessionUpdateDto updateDto) {
         return repository.findById(id)
                 .map(session -> {
-                    session.setDate(updateDto.getSessionDate());
+                    session.setDate(updateDto.getDate());
 
                     if (updateDto.getServiceId() != null) {
                         PhotoService service = findServiceById(updateDto.getServiceId());
@@ -203,7 +203,7 @@ public class PhotoSessionService {
                                            Photographer photographer,
                                            PhotoService service) {
         return PhotoSession.builder()
-                .date(dto.getSessionDate())
+                .date(dto.getDate())
                 .client(client)
                 .photographer(photographer)
                 .service(service)

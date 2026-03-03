@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class PhotoSessionCreateDto {
-    private LocalDateTime sessionDate;
+    private LocalDateTime date;
     private Long clientId;
     private Long photographerId;
     private Long serviceId;

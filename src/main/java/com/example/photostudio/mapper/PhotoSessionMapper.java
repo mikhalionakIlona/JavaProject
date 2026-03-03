@@ -14,7 +14,7 @@ public class PhotoSessionMapper {
 
         PhotoSessionDto.PhotoSessionDtoBuilder builder = PhotoSessionDto.builder()
                 .id(session.getId())
-                .sessionDate(session.getDate())
+                .date(session.getDate())
                 .totalPrice(session.getTotalPrice());
 
         if (session.getClient() != null) {

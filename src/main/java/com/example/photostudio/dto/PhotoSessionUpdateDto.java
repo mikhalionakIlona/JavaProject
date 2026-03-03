@@ -5,6 +5,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class PhotoSessionUpdateDto {
-    private LocalDateTime sessionDate;
+    private LocalDateTime date;
     private Long serviceId;
 }

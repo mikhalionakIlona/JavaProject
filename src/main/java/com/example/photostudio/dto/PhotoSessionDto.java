@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PhotoSessionDto {
     private Long id;
-    private LocalDateTime sessionDate;
+    private LocalDateTime date;
     private Double totalPrice;
     private Long clientId;
     private String clientName;
