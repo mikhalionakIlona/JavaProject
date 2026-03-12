@@ -22,19 +22,18 @@ public interface PhotoSessionRepository extends JpaRepository<PhotoSession, Long
     @Query("SELECT ps FROM PhotoSession ps")
     List<PhotoSession> findAllWithEntityGraph();
 
-    @Query(value = "SELECT DISTINCT ps.* FROM photo_sessions ps " +
-            "LEFT JOIN clients c ON ps.client_id = c.id " +
-            "LEFT JOIN photographers p ON ps.photographer_id = p.id " +
-            "LEFT JOIN services s ON ps.service_id = s.id " +
+    @Query(value = "SELECT DISTINCT ps FROM PhotoSession ps " +
+            "LEFT JOIN ps.client c " +
+            "LEFT JOIN ps.photographer p " +
+            "LEFT JOIN ps.service s " +
             "WHERE (:clientName IS NULL OR " +
-            "LOWER(CAST(c.first_name AS text)) LIKE LOWER(CAST(CONCAT('%', :clientName, '%') AS text)) OR " +
-            "LOWER(CAST(c.last_name AS text)) LIKE LOWER(CAST(CONCAT('%', :clientName, '%') AS text))) " +
+            "LOWER(c.firstName) LIKE LOWER(CONCAT('%', :clientName, '%')) OR " +
+            "LOWER(c.lastName) LIKE LOWER(CONCAT('%', :clientName, '%'))) " +
             "AND (:photographerName IS NULL OR " +
-            "LOWER(CAST(p.first_name AS text)) LIKE LOWER(CAST(CONCAT('%', :photographerName, '%') AS text)) OR " +
-            "LOWER(CAST(p.last_name AS text)) LIKE LOWER(CAST(CONCAT('%', :photographerName, '%') AS text))) " +
+            "LOWER(p.firstName) LIKE LOWER(CONCAT('%', :photographerName, '%')) OR " +
+            "LOWER(p.lastName) LIKE LOWER(CONCAT('%', :photographerName, '%'))) " +
             "AND (:phone IS NULL OR " +
-            "LOWER(CAST(c.phone AS text)) LIKE LOWER(CAST(CONCAT('%', :phone, '%') AS text)))",
-            nativeQuery = true)
+            "LOWER(c.phone) LIKE LOWER(CONCAT('%', :phone, '%')))")
     List<PhotoSession> findSessionsWithFilters(
             @Param("clientName") String clientName,
             @Param("photographerName") String photographerName,
