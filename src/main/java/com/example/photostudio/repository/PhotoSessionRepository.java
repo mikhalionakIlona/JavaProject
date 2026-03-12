@@ -22,22 +22,29 @@ public interface PhotoSessionRepository extends JpaRepository<PhotoSession, Long
     @Query("SELECT ps FROM PhotoSession ps")
     List<PhotoSession> findAllWithEntityGraph();
 
-    @Query(value = "SELECT DISTINCT ps FROM PhotoSession ps " +
-            "LEFT JOIN ps.client c " +
-            "LEFT JOIN ps.photographer p " +
-            "LEFT JOIN ps.service s " +
-            "WHERE (:clientName IS NULL OR " +
-            "LOWER(c.firstName) LIKE LOWER(CONCAT('%', :clientName, '%')) OR " +
-            "LOWER(c.lastName) LIKE LOWER(CONCAT('%', :clientName, '%'))) " +
-            "AND (:photographerName IS NULL OR " +
-            "LOWER(p.firstName) LIKE LOWER(CONCAT('%', :photographerName, '%')) OR " +
-            "LOWER(p.lastName) LIKE LOWER(CONCAT('%', :photographerName, '%'))) " +
-            "AND (:phone IS NULL OR " +
-            "LOWER(c.phone) LIKE LOWER(CONCAT('%', :phone, '%')))")
-    List<PhotoSession> findSessionsWithFilters(
+    @Query("SELECT DISTINCT ps FROM PhotoSession ps " +
+            "LEFT JOIN FETCH ps.client c " +
+            "LEFT JOIN FETCH ps.photographer p " +
+            "LEFT JOIN FETCH ps.service s " +
+            "WHERE (" +
+            "   (LOWER(c.firstName) LIKE LOWER(CONCAT('%', :clientName, '%')) OR " +
+            "    LOWER(c.lastName) LIKE LOWER(CONCAT('%', :clientName, '%'))) " +
+            "   OR :clientName IS NULL" +
+            ") " +
+            "AND (" +
+            "   (LOWER(p.firstName) LIKE LOWER(CONCAT('%', :photographerName, '%')) OR " +
+            "    LOWER(p.lastName) LIKE LOWER(CONCAT('%', :photographerName, '%'))) " +
+            "   OR :photographerName IS NULL" +
+            ") " +
+            "AND (" +
+            "   LOWER(c.phone) LIKE LOWER(CONCAT('%', :phone, '%')) " +
+            "   OR :phone IS NULL" +
+            ")")
+    List<PhotoSession> findSessionsWithFiltersJpql(
             @Param("clientName") String clientName,
             @Param("photographerName") String photographerName,
             @Param("phone") String phone);
+
 
     @Query(value = "SELECT DISTINCT ps.* FROM photo_sessions ps " +
             "LEFT JOIN clients c ON ps.client_id = c.id " +

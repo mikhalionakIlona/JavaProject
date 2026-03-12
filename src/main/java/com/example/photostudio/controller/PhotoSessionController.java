@@ -94,7 +94,7 @@ public class PhotoSessionController {
     }
 
     @GetMapping("/search-jpql")
-    public ResponseEntity<List<PhotoSessionDto>> searchSessions(
+    public ResponseEntity<List<PhotoSessionDto>> searchSessionsJpql(
             @RequestParam(required = false) String clientName,
             @RequestParam(required = false) String photographerName,
             @RequestParam(required = false) String phone) {
@@ -105,8 +105,9 @@ public class PhotoSessionController {
                 .phone(phone)
                 .build();
 
-        return ResponseEntity.ok(photoSessionService.getSessionsWithFilters(filter));
+        return ResponseEntity.ok(photoSessionService.getSessionsWithFiltersJpql(filter));
     }
+
 
     @GetMapping("/search-native")
     public ResponseEntity<List<PhotoSessionDto>> searchSessionsNative(

@@ -158,10 +158,10 @@ public class PhotoSessionService {
         processPhotoSessionCreation(dto, "БЕЗ ТРАНЗАКЦИИ", false);
     }
 
-    public List<PhotoSessionDto> getSessionsWithFilters(PhotoSessionFilterDto filter) {
-        LOG.info("Поиск фотосессий с фильтрацией (JPQL) ");
+    public List<PhotoSessionDto> getSessionsWithFiltersJpql(PhotoSessionFilterDto filter) {
+        LOG.info("Поиск фотосессий с фильтрацией JPQL");
 
-        List<PhotoSession> sessions = repository.findSessionsWithFilters(
+        List<PhotoSession> sessions = repository.findSessionsWithFiltersJpql(
                 filter.clientName(),
                 filter.photographerName(),
                 filter.phone()
