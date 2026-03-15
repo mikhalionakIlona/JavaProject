@@ -1,4 +1,4 @@
-package com.example.photostudio.dto;
+package com.example.photostudio.dto.photograher;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientDto {
+public class PhotographerDto {
     private Long id;
     private String firstName;
     private String lastName;
+    private String patronymic;
     private String phone;
-    private String email;
+    private Double hourlyRate;
 }

@@ -1,6 +1,6 @@
 package com.example.photostudio.service;
 
-import com.example.photostudio.dto.PhotoDto;
+import com.example.photostudio.dto.photo.PhotoDto;
 import com.example.photostudio.mapper.PhotoMapper;
 import com.example.photostudio.model.Photo;
 import com.example.photostudio.model.PhotoSession;

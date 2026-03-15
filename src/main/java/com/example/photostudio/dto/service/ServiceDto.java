@@ -1,4 +1,4 @@
-package com.example.photostudio.dto;
+package com.example.photostudio.dto.service;
 
 import com.example.photostudio.model.ServiceType;
 import lombok.AllArgsConstructor;

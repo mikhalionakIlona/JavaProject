@@ -1,6 +1,6 @@
 package com.example.photostudio.mapper;
 
-import com.example.photostudio.dto.PhotoSessionDto;
+import com.example.photostudio.dto.photosession.PhotoSessionDto;
 import com.example.photostudio.model.PhotoSession;
 import org.springframework.stereotype.Component;
 

@@ -2,10 +2,10 @@ package com.example.photostudio.service;
 
 import com.example.photostudio.cache.PhotoSessionCache;
 import com.example.photostudio.cache.PhotoSessionQueryKey;
-import com.example.photostudio.dto.PhotoSessionCreateDto;
-import com.example.photostudio.dto.PhotoSessionDto;
-import com.example.photostudio.dto.PhotoSessionFilterDto;
-import com.example.photostudio.dto.PhotoSessionUpdateDto;
+import com.example.photostudio.dto.photosession.PhotoSessionCreateDto;
+import com.example.photostudio.dto.photosession.PhotoSessionDto;
+import com.example.photostudio.dto.photosession.PhotoSessionFilterDto;
+import com.example.photostudio.dto.photosession.PhotoSessionUpdateDto;
 import com.example.photostudio.mapper.PhotoSessionMapper;
 import com.example.photostudio.model.Client;
 import com.example.photostudio.model.Photographer;

@@ -1,6 +1,6 @@
 package com.example.photostudio.mapper;
 
-import com.example.photostudio.dto.PhotographerDto;
+import com.example.photostudio.dto.photograher.PhotographerDto;
 import com.example.photostudio.model.Photographer;
 import org.springframework.stereotype.Component;
 

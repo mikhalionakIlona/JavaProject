@@ -1,4 +1,4 @@
-package com.example.photostudio.dto;
+package com.example.photostudio.dto.photo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

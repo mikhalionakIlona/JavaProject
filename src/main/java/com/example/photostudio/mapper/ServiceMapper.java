@@ -1,6 +1,6 @@
 package com.example.photostudio.mapper;
 
-import com.example.photostudio.dto.ServiceDto;
+import com.example.photostudio.dto.service.ServiceDto;
 import com.example.photostudio.model.PhotoService;
 import com.example.photostudio.model.ServiceType;
 import org.springframework.stereotype.Component;

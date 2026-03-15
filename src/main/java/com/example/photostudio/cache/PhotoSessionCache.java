@@ -1,6 +1,6 @@
 package com.example.photostudio.cache;
 
-import com.example.photostudio.dto.PhotoSessionDto;
+import com.example.photostudio.dto.photosession.PhotoSessionDto;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

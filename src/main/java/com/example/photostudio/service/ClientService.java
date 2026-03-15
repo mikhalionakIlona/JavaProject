@@ -1,8 +1,8 @@
 package com.example.photostudio.service;
 
-import com.example.photostudio.dto.ClientDto;
-import com.example.photostudio.dto.ClientCreateDto;
-import com.example.photostudio.dto.ClientUpdateDto;
+import com.example.photostudio.dto.client.ClientDto;
+import com.example.photostudio.dto.client.ClientCreateDto;
+import com.example.photostudio.dto.client.ClientUpdateDto;
 import com.example.photostudio.mapper.ClientMapper;
 import com.example.photostudio.model.Client;
 import com.example.photostudio.repository.ClientRepository;
