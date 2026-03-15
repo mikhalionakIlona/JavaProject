@@ -96,7 +96,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
-            WebRequest request) {  // Удален неиспользуемый параметр ex
+            WebRequest request) {
 
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
