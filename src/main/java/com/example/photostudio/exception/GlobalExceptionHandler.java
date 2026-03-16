@@ -2,6 +2,7 @@ package com.example.photostudio.exception;
 
 import com.example.photostudio.dto.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -22,12 +24,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNoSuchElementException(
             NoSuchElementException ex, WebRequest request) {
 
+        String path = request.getDescription(false).replace("uri=", "");
+        log.error("Resource not found: {} - {}", path, ex.getMessage());
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
                 .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .message(ex.getMessage())
-                .path(request.getDescription(false).replace("uri=", ""))
+                .path(path)
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
@@ -37,19 +42,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
 
+        String path = request.getDescription(false).replace("uri=", "");
         Map<String, String> errors = new HashMap<>();
+
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
 
+        log.error("Validation error 400 at {}: {}", path, errors);
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message("Ошибка валидации")
-                .path(request.getDescription(false).replace("uri=", ""))
+                .path(path)
                 .validationErrors(errors)
                 .build();
 
@@ -60,19 +69,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(
             ConstraintViolationException ex, WebRequest request) {
 
+        String path = request.getDescription(false).replace("uri=", "");
         Map<String, String> errors = new HashMap<>();
+
         ex.getConstraintViolations().forEach(violation -> {
             String fieldName = violation.getPropertyPath().toString();
             String errorMessage = violation.getMessage();
             errors.put(fieldName, errorMessage);
         });
 
+        log.error("Constraint violation 400 at {}: {}", path, errors);
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message("Ошибка валидации")
-                .path(request.getDescription(false).replace("uri=", ""))
+                .path(path)
                 .validationErrors(errors)
                 .build();
 
@@ -83,12 +96,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException ex, WebRequest request) {
 
+        String path = request.getDescription(false).replace("uri=", "");
+        log.error("Type mismatch 400 at {}: parameter '{}' should be {}",
+                path, ex.getName(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message("Неверный тип параметра: " + ex.getName())
-                .path(request.getDescription(false).replace("uri=", ""))
+                .path(path)
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
@@ -96,14 +113,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
-            WebRequest request) {
+            Exception ex, WebRequest request) {
+
+        String path = request.getDescription(false).replace("uri=", "");
+        log.error("Internal server error 500 at {}: ", path, ex);
 
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
                 .message("Внутренняя ошибка сервера")
-                .path(request.getDescription(false).replace("uri=", ""))
+                .path(path)
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
