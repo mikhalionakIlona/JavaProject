@@ -1,4 +1,4 @@
-package com.example.photostudio.dto.photograher;
+package com.example.photostudio.dto.photographer;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -16,7 +16,7 @@ public class PhotographerUpdateDto {
     @Size(max = 50, message = "Отчество должно содержать не более 50 символов")
     private String patronymic;
 
-    @Pattern(regexp = "^\\\\+?\\\\d{10,15}$", message = "Неверный формат телефона")
+    @Pattern(regexp = "^\\+375\\d{9}$", message = "Неверный формат телефона")
     private String phone;
 
     @Positive(message = "Почасовая ставка должна быть положительной")

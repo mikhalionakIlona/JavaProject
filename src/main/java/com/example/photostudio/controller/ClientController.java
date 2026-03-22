@@ -1,5 +1,6 @@
 package com.example.photostudio.controller;
 
+import com.example.photostudio.dto.client.ClientBulkCreateDto;
 import com.example.photostudio.dto.client.ClientDto;
 import com.example.photostudio.dto.client.ClientCreateDto;
 import com.example.photostudio.dto.client.ClientUpdateDto;
@@ -77,5 +78,34 @@ public class ClientController {
         return service.deleteClient(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/bulk")
+    @Operation(summary = "Массовое создание клиентов")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Клиенты созданы"),
+        @ApiResponse(responseCode = "400", description = "Ошибка валидации")
+    })
+    public ResponseEntity<List<ClientDto>> createClientsBulk(
+            @Valid @RequestBody ClientBulkCreateDto bulkCreateDto) {
+        return ResponseEntity.ok(service.createClientsBulk(bulkCreateDto.getClients()));
+    }
+
+    @PostMapping("/bulk/demo/with-transaction")
+    @Operation(summary = "Демонстрация массового создания с транзакцией")
+    public ResponseEntity<List<ClientDto>> demoBulkWithTransaction(
+            @Valid @RequestBody ClientBulkCreateDto bulkCreateDto) {
+        List<ClientDto> createdClients = service.createClientsBulkWithTransaction(
+                bulkCreateDto.getClients());
+        return ResponseEntity.ok(createdClients);
+    }
+
+    @PostMapping("/bulk/demo/without-transaction")
+    @Operation(summary = "Демонстрация массового создания без транзакции")
+    public ResponseEntity<List<ClientDto>> demoBulkWithoutTransaction(
+            @Valid @RequestBody ClientBulkCreateDto bulkCreateDto) {
+        List<ClientDto> createdClients = service.createClientsBulkWithoutTransaction(
+                bulkCreateDto.getClients());
+        return ResponseEntity.ok(createdClients);
     }
 }

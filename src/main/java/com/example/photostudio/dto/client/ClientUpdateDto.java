@@ -14,7 +14,7 @@ public class ClientUpdateDto {
     @Size(min = 2, max = 50, message = "Фамилия должна содержать от 2 до 50 символов")
     private String lastName;
 
-    @Pattern(regexp = "^\\\\+?\\\\d{10,15}$", message = "Неверный формат телефона")
+    @Pattern(regexp = "^\\+375\\d{9}$", message = "Неверный формат телефона")
     private String phone;
 
     @Email(message = "Неверный формат email")

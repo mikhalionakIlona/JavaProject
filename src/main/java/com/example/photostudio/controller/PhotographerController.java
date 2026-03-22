@@ -1,8 +1,8 @@
 package com.example.photostudio.controller;
 
-import com.example.photostudio.dto.photograher.PhotographerDto;
-import com.example.photostudio.dto.photograher.PhotographerCreateDto;
-import com.example.photostudio.dto.photograher.PhotographerUpdateDto;
+import com.example.photostudio.dto.photographer.PhotographerDto;
+import com.example.photostudio.dto.photographer.PhotographerCreateDto;
+import com.example.photostudio.dto.photographer.PhotographerUpdateDto;
 import com.example.photostudio.dto.ErrorResponse;
 import com.example.photostudio.service.PhotographerService;
 import io.swagger.v3.oas.annotations.Operation;

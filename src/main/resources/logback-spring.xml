@@ -18,6 +18,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -25,10 +26,11 @@
         <file>${INFO_LOG_FILE}</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${INFO_LOG_ARCHIVE}</fileNamePattern>
-            <maxFileSize>20KB</maxFileSize>
+            <maxFileSize>15KB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
@@ -41,19 +43,35 @@
         </filter>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${ERROR_LOG_ARCHIVE}</fileNamePattern>
-            <maxFileSize>20KB</maxFileSize>
+            <maxFileSize>15KB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
     </appender>
 
-    <logger name="com.restaurant.bookingservice" level="DEBUG"/>
-    <logger name="org.springframework" level="INFO"/>
-    <logger name="org.hibernate.SQL" level="DEBUG"/>
-    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
+    <logger name="com.restaurant.bookingservice" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="INFO_FILE"/>
+    </logger>
+
+    <logger name="org.springframework" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="INFO_FILE"/>
+    </logger>
+
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="INFO_FILE"/>
+    </logger>
+
+    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="INFO_FILE"/>
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

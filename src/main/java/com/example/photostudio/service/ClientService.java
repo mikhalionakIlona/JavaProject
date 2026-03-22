@@ -7,13 +7,20 @@ import com.example.photostudio.mapper.ClientMapper;
 import com.example.photostudio.model.Client;
 import com.example.photostudio.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClientService {
+
+    private static final int MAX_BULK_SIZE = 3;
+
     private final ClientRepository repository;
     private final ClientMapper mapper;
 
@@ -61,5 +68,67 @@ public class ClientService {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public List<ClientDto> createClientsBulk(List<ClientCreateDto> createDto) {
+        log.info("Массовое создание {} клиентов", createDto.size());
+        List<Client> clients = createDto.stream()
+                .map(this::convertToEntity)
+                .toList();
+        List<Client> savedClients = repository.saveAll(clients);
+        return savedClients.stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    private Client convertToEntity(ClientCreateDto dto) {
+        return Client.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .phone(dto.getPhone())
+                .email(dto.getEmail())
+                .build();
+    }
+
+    @Transactional
+    public List<ClientDto> createClientsBulkWithTransaction(List<ClientCreateDto> createDto) {
+        log.info("Создание клиентов с транзакцией");
+
+        List<Client> clients = createDto.stream()
+                .map(this::convertToEntity)
+                .toList();
+        List<Client> savedClients = repository.saveAll(clients);
+
+        if (createDto.size() > MAX_BULK_SIZE) {
+            throw new NoSuchElementException(
+                    "Превышен лимит в " + MAX_BULK_SIZE + " клиентов. " +
+                            "Транзакция будет откачена"
+            );
+        }
+
+        return savedClients.stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    public List<ClientDto> createClientsBulkWithoutTransaction(List<ClientCreateDto> createDto) {
+        log.info("Создание клиентов без транзакции");
+
+        List<Client> clients = createDto.stream()
+                .map(this::convertToEntity)
+                .toList();
+        List<Client> savedClients = repository.saveAll(clients);
+
+        if (createDto.size() > MAX_BULK_SIZE) {
+            throw new NoSuchElementException(
+                    "Превышен лимит в " + MAX_BULK_SIZE + " клиентов. " +
+                            "Данные уже сохранены в БД"
+            );
+        }
+
+        return savedClients.stream()
+                .map(mapper::toDto)
+                .toList();
     }
 }
