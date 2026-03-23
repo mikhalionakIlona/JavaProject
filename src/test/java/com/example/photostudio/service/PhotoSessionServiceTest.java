@@ -769,4 +769,25 @@ class PhotoSessionServiceTest {
                 Arguments.of(null, null, "+375")
         );
     }
+    @Test
+    void demonstrateNPlus1ProblemShouldExecuteWithMultipleSessions() {
+        PhotoSession session2 = PhotoSession.builder()
+                .id(2L)
+                .date(LocalDateTime.now().plusDays(2))
+                .totalPrice(10000.0)
+                .client(client)
+                .photographer(photographer)
+                .service(photoService)
+                .build();
+
+        List<PhotoSession> sessions = List.of(photoSession, session2);
+        when(photoSessionRepository.findAllWithoutFetch()).thenReturn(sessions);
+        when(photoSessionRepository.findAllWithEntityGraph()).thenReturn(sessions);
+
+        photoSessionService.demonstrateNPlus1Problem();
+        photoSessionService.demonstrateEntityGraphSolution();
+
+        verify(photoSessionRepository, times(1)).findAllWithoutFetch();
+        verify(photoSessionRepository, times(1)).findAllWithEntityGraph();
+    }
 }
