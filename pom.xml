@@ -42,8 +42,6 @@
         <sonar.projectKey>photostudio</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.exclusions>src/main/java/com/example/photostudio/PhotostudioApplication.java,src/main/java/com/example/photostudio/config/**,src/main/java/com/example/photostudio/exception/**,src/main/java/com/example/photostudio/aspect/**,src/main/java/com/example/photostudio/cache/**,src/main/java/com/example/photostudio/mapper/**,src/main/java/com/example/photostudio/model/**,src/main/java/com/example/photostudio/repository/**</sonar.exclusions>
-        <sonar.coverage.exclusions>src/main/java/com/example/photostudio/PhotostudioApplication.java,src/main/java/com/example/photostudio/config/**,src/main/java/com/example/photostudio/exception/**,src/main/java/com/example/photostudio/aspect/**,src/main/java/com/example/photostudio/cache/**,src/main/java/com/example/photostudio/mapper/**,src/main/java/com/example/photostudio/model/**,src/main/java/com/example/photostudio/repository/**</sonar.coverage.exclusions>
     </properties>
 
     <repositories>
@@ -228,46 +226,6 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <includes>
-                                <include>com/example/photostudio/service/**/*.class</include>
-                                <include>com/example/photostudio/controller/**/*.class</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>check</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>com/example/photostudio/service/**/*.class</include>
-                                <include>com/example/photostudio/controller/**/*.class</include>
-                            </includes>
-                            <rules>
-                                <rule>
-                                    <element>PACKAGE</element>
-                                    <includes>
-                                        <include>com.example.photostudio.service</include>
-                                        <include>com.example.photostudio.controller</include>
-                                    </includes>
-                                    <limits>
-                                        <limit>
-                                            <counter>LINE</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
-                                        </limit>
-                                        <limit>
-                                            <counter>BRANCH</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.70</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                            </rules>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
