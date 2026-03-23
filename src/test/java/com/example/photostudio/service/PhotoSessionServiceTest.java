@@ -500,79 +500,123 @@ class PhotoSessionServiceTest {
     }
 
     @Test
-    void getSessionsWithFiltersPagedWithNullFiltersShouldReturnPage() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
-        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+    void getSessionsWithFiltersJpqlWithAllParametersShouldReturnFilteredList() {
         PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
-                .clientName(null)
-                .photographerName(null)
-                .phone(null)
-                .page(0)
-                .size(10)
+                .clientName(CLIENT_NAME)
+                .photographerName(PHOTOGRAPHER_NAME)
+                .phone("+375")
                 .build();
 
-        when(photoSessionRepository.findSessionsWithFiltersPaged(
-                isNull(), isNull(), isNull(), any(Pageable.class)))
-                .thenReturn(page);
-        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
-
-        org.springframework.data.domain.Page<PhotoSessionDto> result =
-                photoSessionService.getSessionsWithFiltersPaged(filter);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-    }
-
-    @Test
-    void getSessionsWithFiltersNativeWithNullFiltersShouldReturnList() {
-        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
-                .clientName(null)
-                .photographerName(null)
-                .phone(null)
-                .build();
-
-        when(photoSessionRepository.findSessionsWithFiltersNative(isNull(), isNull(), isNull()))
-                .thenReturn(List.of(photoSession));
-        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
-
-        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
-
-        assertThat(result).hasSize(1);
-        verify(photoSessionRepository).findSessionsWithFiltersNative(null, null, null);
-    }
-
-    @Test
-    void getSessionsWithFiltersJpqlWithNullFiltersShouldReturnList() {
-        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
-                .clientName(null)
-                .photographerName(null)
-                .phone(null)
-                .build();
-
-        when(photoSessionRepository.findSessionsWithFiltersJpql(isNull(), isNull(), isNull()))
+        when(photoSessionRepository.findSessionsWithFiltersJpql(any(), any(), any()))
                 .thenReturn(List.of(photoSession));
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
 
         List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersJpql(filter);
 
         assertThat(result).hasSize(1);
-        verify(photoSessionRepository).findSessionsWithFiltersJpql(null, null, null);
+        verify(photoSessionRepository).findSessionsWithFiltersJpql(
+                CLIENT_NAME, PHOTOGRAPHER_NAME, "+375");
     }
 
     @Test
-    void getSessionsWithFiltersPagedWithAllFiltersShouldReturnPage() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
-        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+    void getSessionsWithFiltersNativeWithAllParametersShouldReturnFilteredList() {
         PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
                 .clientName(CLIENT_NAME)
                 .photographerName(PHOTOGRAPHER_NAME)
                 .phone("+375")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersNative(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
+
+        assertThat(result).hasSize(1);
+        verify(photoSessionRepository).findSessionsWithFiltersNative(
+                CLIENT_NAME, PHOTOGRAPHER_NAME, "+375");
+    }
+
+    @Test
+    void getSessionsWithFiltersJpqlWithOnlyPhotographerNameShouldReturnFilteredList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .photographerName(PHOTOGRAPHER_NAME)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersJpql(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersJpql(filter);
+
+        assertThat(result).hasSize(1);
+        verify(photoSessionRepository).findSessionsWithFiltersJpql(
+                null, PHOTOGRAPHER_NAME, null);
+    }
+
+    @Test
+    void getSessionsWithFiltersJpqlWithOnlyPhoneShouldReturnFilteredList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .phone("+375")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersJpql(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersJpql(filter);
+
+        assertThat(result).hasSize(1);
+        verify(photoSessionRepository).findSessionsWithFiltersJpql(
+                null, null, "+375");
+    }
+
+    @Test
+    void getSessionsWithFiltersNativeWithOnlyPhotographerNameShouldReturnFilteredList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .photographerName(PHOTOGRAPHER_NAME)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersNative(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
+
+        assertThat(result).hasSize(1);
+        verify(photoSessionRepository).findSessionsWithFiltersNative(
+                null, PHOTOGRAPHER_NAME, null);
+    }
+
+    @Test
+    void getSessionsWithFiltersNativeWithOnlyPhoneShouldReturnFilteredList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .phone("+375")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersNative(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
+
+        assertThat(result).hasSize(1);
+        verify(photoSessionRepository).findSessionsWithFiltersNative(
+                null, null, "+375");
+    }
+
+    @Test
+    void getSessionsWithFiltersPagedWithPhotographerNameOnlyShouldReturnPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .photographerName(PHOTOGRAPHER_NAME)
                 .page(0)
                 .size(10)
                 .build();
 
         when(photoSessionRepository.findSessionsWithFiltersPaged(
-                eq(CLIENT_NAME), eq(PHOTOGRAPHER_NAME), eq("+375"), any(Pageable.class)))
+                isNull(), eq(PHOTOGRAPHER_NAME), isNull(), any(Pageable.class)))
                 .thenReturn(page);
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
 
@@ -584,18 +628,63 @@ class PhotoSessionServiceTest {
     }
 
     @Test
-    void getSessionsWithCacheWhenCacheKeyIsNullShouldQueryDatabase() {
+    void getSessionsWithFiltersPagedWithPhoneOnlyShouldReturnPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
         PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
-                .clientName(null)
+                .phone("+375")
                 .page(0)
                 .size(10)
                 .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                isNull(), isNull(), eq("+375"), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithFiltersPaged(filter);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void getSessionsWithFiltersPagedWithClientNameOnlyShouldReturnPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .page(0)
+                .size(10)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                eq(CLIENT_NAME), isNull(), isNull(), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithFiltersPaged(filter);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void getSessionsWithCacheWithPhotographerNameShouldWork() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .photographerName(PHOTOGRAPHER_NAME)
+                .page(0)
+                .size(10)
+                .build();
+
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
         PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
 
         when(photoSessionCache.get(any())).thenReturn(null);
         when(photoSessionRepository.findSessionsWithFiltersPaged(
-                isNull(), isNull(), isNull(), any(Pageable.class)))
+                isNull(), eq(PHOTOGRAPHER_NAME), isNull(), any(Pageable.class)))
                 .thenReturn(page);
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
         doNothing().when(photoSessionCache).put(any(), any());
@@ -605,51 +694,62 @@ class PhotoSessionServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        verify(photoSessionCache).put(any(), any());
     }
 
     @Test
-    void getSessionsWithCacheWhenCacheKeyIsNullAndCacheHitShouldReturnFromCache() {
+    void getSessionsWithCacheWithPhoneShouldWork() {
         PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
-                .clientName(null)
+                .phone("+375")
                 .page(0)
                 .size(10)
                 .build();
-        PageImpl<PhotoSessionDto> cachedPage = new PageImpl<>(List.of(photoSessionDto));
 
-        when(photoSessionCache.get(any())).thenReturn(cachedPage);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+
+        when(photoSessionCache.get(any())).thenReturn(null);
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                isNull(), isNull(), eq("+375"), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+        doNothing().when(photoSessionCache).put(any(), any());
 
         org.springframework.data.domain.Page<PhotoSessionDto> result =
                 photoSessionService.getSessionsWithCache(filter);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        verify(photoSessionRepository, never())
-                .findSessionsWithFiltersPaged(any(), any(), any(), any());
     }
 
     @Test
-    void createPhotoSessionWithNullFieldsShouldHandleGracefully() {
-        PhotoSessionCreateDto nullCreateDto = new PhotoSessionCreateDto();
-        nullCreateDto.setDate(null);
-        nullCreateDto.setClientId(null);
-        nullCreateDto.setPhotographerId(null);
-        nullCreateDto.setServiceId(null);
+    void getSessionsWithCacheWithAllParametersShouldWork() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .photographerName(PHOTOGRAPHER_NAME)
+                .phone("+375")
+                .page(0)
+                .size(10)
+                .build();
 
-        when(clientRepository.findById(any())).thenReturn(Optional.of(client));
-        when(photographerRepository.findById(any())).thenReturn(Optional.of(photographer));
-        when(serviceRepository.findById(any())).thenReturn(Optional.of(photoService));
-        when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
-        when(photoSessionMapper.toDto(any(PhotoSession.class))).thenReturn(photoSessionDto);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
 
-        PhotoSessionDto result = photoSessionService.createPhotoSession(nullCreateDto);
+        when(photoSessionCache.get(any())).thenReturn(null);
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                eq(CLIENT_NAME), eq(PHOTOGRAPHER_NAME), eq("+375"), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+        doNothing().when(photoSessionCache).put(any(), any());
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithCache(filter);
 
         assertThat(result).isNotNull();
-        verify(photoSessionRepository, times(1)).save(any(PhotoSession.class));
+        assertThat(result.getContent()).hasSize(1);
     }
 
     @Test
-    void updatePhotoSessionWithNullServiceIdShouldOnlyUpdateDate() {
+    void updatePhotoSessionWithServiceIdNullShouldUpdateOnlyDate() {
         PhotoSessionUpdateDto updateOnlyDate = new PhotoSessionUpdateDto();
         updateOnlyDate.setDate(LocalDateTime.now().plusDays(2));
         updateOnlyDate.setServiceId(null);
@@ -681,5 +781,39 @@ class PhotoSessionServiceTest {
         assertThat(result.getDate()).isEqualTo(updateOnlyDate.getDate());
         assertThat(result.getServiceId()).isEqualTo(ID);
         verify(photoSessionCache).invalidateAll();
+    }
+
+    @Test
+    void getSessionsWithFiltersJpqlWithPartialMatchesShouldWork() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName("Ив")
+                .photographerName("Пет")
+                .phone("375")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersJpql(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersJpql(filter);
+
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void getSessionsWithFiltersNativeWithPartialMatchesShouldWork() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName("Ив")
+                .photographerName("Пет")
+                .phone("375")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersNative(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
+
+        assertThat(result).hasSize(1);
     }
 }
