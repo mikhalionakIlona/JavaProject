@@ -44,7 +44,7 @@ class PhotographerServiceTest {
         createDto.setFirstName("Петр");
         createDto.setLastName("Сидоров");
         createDto.setPatronymic("Иванович");
-        createDto.setPhone("+71234567890");
+        createDto.setPhone("+375298587885");
         createDto.setHourlyRate(1500.0);
 
         updateDto = new PhotographerUpdateDto();
@@ -56,7 +56,7 @@ class PhotographerServiceTest {
                 .firstName("Петр")
                 .lastName("Сидоров")
                 .patronymic("Иванович")
-                .phone("+71234567890")
+                .phone("+375298587885")
                 .hourlyRate(1500.0)
                 .build();
 
@@ -65,7 +65,7 @@ class PhotographerServiceTest {
                 .firstName("Петр")
                 .lastName("Сидоров")
                 .patronymic("Иванович")
-                .phone("+71234567890")
+                .phone("+375298587885")
                 .hourlyRate(1500.0)
                 .build();
     }
@@ -119,7 +119,7 @@ class PhotographerServiceTest {
                 .firstName("Алексей")
                 .lastName("Сидоров")
                 .patronymic("Иванович")
-                .phone("+71234567890")
+                .phone("+375298587885")
                 .hourlyRate(2000.0)
                 .build();
 
@@ -128,7 +128,7 @@ class PhotographerServiceTest {
                 .firstName("Алексей")
                 .lastName("Сидоров")
                 .patronymic("Иванович")
-                .phone("+71234567890")
+                .phone("+375298587885")
                 .hourlyRate(2000.0)
                 .build();
 
