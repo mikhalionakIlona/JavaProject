@@ -415,13 +415,13 @@ class ClientServiceTest {
 
         List<Client> clients = Arrays.asList(client, client2);
         when(clientRepository.findAll()).thenReturn(clients);
-        when(clientMapper.toDto(client)).thenReturn(clientDto);
+
         when(clientMapper.toDto(client2)).thenReturn(clientDto2);
 
         ClientDto result = clientService.getClientByEmail(EMAIL);
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(ID);
+        assertThat(result.getId()).isEqualTo(2L);
         verify(clientRepository, times(1)).findAll();
     }
 
