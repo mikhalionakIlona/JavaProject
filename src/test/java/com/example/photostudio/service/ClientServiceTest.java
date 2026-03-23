@@ -397,6 +397,14 @@ class ClientServiceTest {
 
     @Test
     void getClientByEmailWhenMultipleClientsShouldReturnFirstMatch() {
+        Client client1 = Client.builder()
+                .id(1L)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .phone(PHONE)
+                .email(EMAIL)
+                .build();
+
         Client client2 = Client.builder()
                 .id(2L)
                 .firstName("Петр")
@@ -405,23 +413,22 @@ class ClientServiceTest {
                 .email(EMAIL)
                 .build();
 
-        ClientDto clientDto2 = ClientDto.builder()
-                .id(2L)
-                .firstName("Петр")
-                .lastName("Сидоров")
+        ClientDto clientDto1 = ClientDto.builder()
+                .id(1L)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
                 .phone(PHONE)
                 .email(EMAIL)
                 .build();
 
-        List<Client> clients = Arrays.asList(client, client2);
+        List<Client> clients = Arrays.asList(client1, client2);
         when(clientRepository.findAll()).thenReturn(clients);
-
-        when(clientMapper.toDto(client2)).thenReturn(clientDto2);
+        when(clientMapper.toDto(any(Client.class))).thenReturn(clientDto1);
 
         ClientDto result = clientService.getClientByEmail(EMAIL);
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(2L);
+        assertThat(result.getId()).isEqualTo(1L);
         verify(clientRepository, times(1)).findAll();
     }
 
