@@ -37,11 +37,6 @@
         <xmlunit.version>2.10.0</xmlunit.version>
         <jackson.version>2.18.3</jackson.version>
         <mockito.version>5.14.2</mockito.version>
-
-        <sonar.organization>photostudio</sonar.organization>
-        <sonar.projectKey>photostudio</sonar.projectKey>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <repositories>
@@ -226,6 +221,11 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <includes>
+                                <include>com/example/photostudio/service/**/*.class</include>
+                            </includes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -238,4 +238,3 @@
         </plugins>
     </build>
 </project>
-
