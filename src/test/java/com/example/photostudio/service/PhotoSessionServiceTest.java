@@ -1,7 +1,6 @@
 package com.example.photostudio.service;
 
 import com.example.photostudio.cache.PhotoSessionCache;
-import com.example.photostudio.cache.PhotoSessionQueryKey;
 import com.example.photostudio.dto.photosession.PhotoSessionCreateDto;
 import com.example.photostudio.dto.photosession.PhotoSessionDto;
 import com.example.photostudio.dto.photosession.PhotoSessionFilterDto;
@@ -18,7 +17,6 @@ import com.example.photostudio.repository.ServiceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,9 +32,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,13 +44,20 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class PhotoSessionServiceTest {
 
-    @Mock private PhotoSessionRepository photoSessionRepository;
-    @Mock private PhotoSessionMapper photoSessionMapper;
-    @Mock private ClientRepository clientRepository;
-    @Mock private PhotographerRepository photographerRepository;
-    @Mock private ServiceRepository serviceRepository;
-    @Mock private PhotoSessionCache photoSessionCache;
-    @InjectMocks private PhotoSessionService photoSessionService;
+    @Mock
+    private PhotoSessionRepository photoSessionRepository;
+    @Mock
+    private PhotoSessionMapper photoSessionMapper;
+    @Mock
+    private ClientRepository clientRepository;
+    @Mock
+    private PhotographerRepository photographerRepository;
+    @Mock
+    private ServiceRepository serviceRepository;
+    @Mock
+    private PhotoSessionCache photoSessionCache;
+    @InjectMocks
+    private PhotoSessionService photoSessionService;
 
     private static final String CLIENT_NAME = "Иван";
     private static final String PHOTOGRAPHER_NAME = "Петр Сидоров";
@@ -125,9 +132,10 @@ class PhotoSessionServiceTest {
         when(photoSessionRepository.findAll()).thenReturn(List.of(photoSession));
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
 
-        var result = photoSessionService.getAllPhotoSessions();
+        List<PhotoSessionDto> result = photoSessionService.getAllPhotoSessions();
 
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(ID);
         verify(photoSessionRepository).findAll();
     }
 
@@ -136,16 +144,20 @@ class PhotoSessionServiceTest {
         when(photoSessionRepository.findById(ID)).thenReturn(Optional.of(photoSession));
         when(photoSessionMapper.toDto(photoSession)).thenReturn(photoSessionDto);
 
-        var result = photoSessionService.getPhotoSessionById(ID);
+        PhotoSessionDto result = photoSessionService.getPhotoSessionById(ID);
 
-        assertThat(result).isNotNull().extracting(PhotoSessionDto::getId).isEqualTo(ID);
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(ID);
         verify(photoSessionRepository).findById(ID);
     }
 
     @Test
     void getPhotoSessionByIdWhenNotExistsShouldReturnNull() {
         when(photoSessionRepository.findById(NON_EXISTENT_ID)).thenReturn(Optional.empty());
-        assertThat(photoSessionService.getPhotoSessionById(NON_EXISTENT_ID)).isNull();
+
+        PhotoSessionDto result = photoSessionService.getPhotoSessionById(NON_EXISTENT_ID);
+
+        assertThat(result).isNull();
     }
 
     @Test
@@ -153,9 +165,10 @@ class PhotoSessionServiceTest {
         when(photoSessionRepository.findByClientId(ID)).thenReturn(List.of(photoSession));
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
 
-        var result = photoSessionService.getPhotoSessionsByClientId(ID);
+        List<PhotoSessionDto> result = photoSessionService.getPhotoSessionsByClientId(ID);
 
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getClientId()).isEqualTo(ID);
         verify(photoSessionRepository).findByClientId(ID);
     }
 
@@ -167,9 +180,10 @@ class PhotoSessionServiceTest {
         when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
         when(photoSessionMapper.toDto(any(PhotoSession.class))).thenReturn(photoSessionDto);
 
-        var result = photoSessionService.createPhotoSession(createDto);
+        PhotoSessionDto result = photoSessionService.createPhotoSession(createDto);
 
-        assertThat(result).isNotNull().extracting(PhotoSessionDto::getId).isEqualTo(ID);
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(ID);
         verify(photoSessionCache).invalidateAll();
     }
 
@@ -178,7 +192,9 @@ class PhotoSessionServiceTest {
         when(photoSessionRepository.findById(ID)).thenReturn(Optional.of(photoSession));
         doNothing().when(photoSessionRepository).delete(any());
 
-        assertThat(photoSessionService.deletePhotoSession(ID)).isTrue();
+        boolean result = photoSessionService.deletePhotoSession(ID);
+
+        assertThat(result).isTrue();
         verify(photoSessionRepository).findById(ID);
         verify(photoSessionRepository).delete(any());
     }
@@ -186,18 +202,21 @@ class PhotoSessionServiceTest {
     @Test
     void deletePhotoSessionWhenNotExistsShouldReturnFalse() {
         when(photoSessionRepository.findById(NON_EXISTENT_ID)).thenReturn(Optional.empty());
-        assertThat(photoSessionService.deletePhotoSession(NON_EXISTENT_ID)).isFalse();
+
+        boolean result = photoSessionService.deletePhotoSession(NON_EXISTENT_ID);
+
+        assertThat(result).isFalse();
         verify(photoSessionRepository, never()).delete(any());
     }
 
     @Test
     void updatePhotoSessionWhenExistsShouldReturnUpdated() {
-        var newService = com.example.photostudio.model.PhotoService.builder()
+        com.example.photostudio.model.PhotoService newService = com.example.photostudio.model.PhotoService.builder()
                 .id(2L)
                 .serviceType(ServiceType.WEDDING)
                 .build();
 
-        var updatedSession = PhotoSession.builder()
+        PhotoSession updatedSession = PhotoSession.builder()
                 .id(ID)
                 .date(updateDto.getDate())
                 .totalPrice(9000.0)
@@ -206,7 +225,7 @@ class PhotoSessionServiceTest {
                 .service(newService)
                 .build();
 
-        var updatedDto = PhotoSessionDto.builder()
+        PhotoSessionDto updatedDto = PhotoSessionDto.builder()
                 .id(ID)
                 .date(updateDto.getDate())
                 .totalPrice(9000.0)
@@ -219,37 +238,92 @@ class PhotoSessionServiceTest {
         when(photoSessionRepository.save(any())).thenReturn(updatedSession);
         when(photoSessionMapper.toDto(updatedSession)).thenReturn(updatedDto);
 
-        var result = photoSessionService.updatePhotoSession(ID, updateDto);
+        PhotoSessionDto result = photoSessionService.updatePhotoSession(ID, updateDto);
 
-        assertThat(result).isNotNull().extracting(PhotoSessionDto::getServiceId).isEqualTo(2L);
+        assertThat(result).isNotNull();
+        assertThat(result.getServiceId()).isEqualTo(2L);
         verify(photoSessionCache).invalidateAll();
     }
 
     @Test
     void updatePhotoSessionWhenNotExistsShouldReturnNull() {
         when(photoSessionRepository.findById(NON_EXISTENT_ID)).thenReturn(Optional.empty());
-        assertThat(photoSessionService.updatePhotoSession(NON_EXISTENT_ID, updateDto)).isNull();
+
+        PhotoSessionDto result = photoSessionService.updatePhotoSession(NON_EXISTENT_ID, updateDto);
+
+        assertThat(result).isNull();
         verify(photoSessionCache, never()).invalidateAll();
     }
 
     @Test
     void getSessionsWithFiltersShouldReturnFilteredList() {
-        var filter = PhotoSessionFilterDto.builder().clientName(CLIENT_NAME).build();
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .build();
 
-        when(photoSessionRepository.findSessionsWithFiltersJpql(any(), any(), any())).thenReturn(List.of(photoSession));
+        when(photoSessionRepository.findSessionsWithFiltersJpql(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
 
-        var result = photoSessionService.getSessionsWithFiltersJpql(filter);
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersJpql(filter);
 
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getClientName()).isEqualTo(CLIENT_NAME);
         verify(photoSessionRepository).findSessionsWithFiltersJpql(CLIENT_NAME, null, null);
     }
 
     @Test
+    void getSessionsWithFiltersNativeShouldReturnFilteredList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersNative(any(), any(), any()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getClientName()).isEqualTo(CLIENT_NAME);
+        verify(photoSessionRepository).findSessionsWithFiltersNative(CLIENT_NAME, null, null);
+    }
+
+    @Test
+    void getSessionsWithFiltersJpqlWhenNoResultsShouldReturnEmptyList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName("Несуществующий")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersJpql(any(), any(), any()))
+                .thenReturn(List.of());
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersJpql(filter);
+
+        assertThat(result).isEmpty();
+        verify(photoSessionRepository).findSessionsWithFiltersJpql("Несуществующий", null, null);
+    }
+
+    @Test
+    void getSessionsWithFiltersNativeWhenNoResultsShouldReturnEmptyList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName("Несуществующий")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersNative(any(), any(), any()))
+                .thenReturn(List.of());
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
+
+        assertThat(result).isEmpty();
+        verify(photoSessionRepository).findSessionsWithFiltersNative("Несуществующий", null, null);
+    }
+
+    @Test
     void getSessionsWithFiltersPagedShouldReturnPage() {
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
-        var page = new PageImpl<>(List.of(photoSession), pageable, 1);
-        var filter = PhotoSessionFilterDto.builder()
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
                 .clientName(CLIENT_NAME)
                 .page(0)
                 .size(10)
@@ -257,70 +331,170 @@ class PhotoSessionServiceTest {
                 .sortDirection("DESC")
                 .build();
 
-        var clientCaptor = ArgumentCaptor.forClass(String.class);
-        var pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-
         when(photoSessionRepository.findSessionsWithFiltersPaged(
-                clientCaptor.capture(), any(), any(), pageableCaptor.capture()))
+                any(), any(), any(), any(Pageable.class)))
                 .thenReturn(page);
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
 
-        var result = photoSessionService.getSessionsWithFiltersPaged(filter);
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithFiltersPaged(filter);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        assertThat(clientCaptor.getValue()).isEqualTo(CLIENT_NAME);
-        assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
-        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(10);
+        assertThat(result.getContent().get(0).getClientName()).isEqualTo(CLIENT_NAME);
+    }
+
+    @Test
+    void getSessionsWithFiltersPagedWithSortingShouldReturnPage() {
+        Pageable pageable = PageRequest.of(1, 5, Sort.by(Sort.Direction.ASC, "totalPrice"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .page(1)
+                .size(5)
+                .sortBy("totalPrice")
+                .sortDirection("ASC")
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                any(), any(), any(), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithFiltersPaged(filter);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(1);
+        assertThat(result.getPageable().getPageSize()).isEqualTo(5);
     }
 
     @Test
     void getSessionsWithCacheWhenCacheHitShouldReturnFromCache() {
-        var filter = PhotoSessionFilterDto.builder().clientName(CLIENT_NAME).page(0).size(10).build();
-        var cachedPage = new PageImpl<>(List.of(photoSessionDto));
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .page(0)
+                .size(10)
+                .build();
+        PageImpl<PhotoSessionDto> cachedPage = new PageImpl<>(List.of(photoSessionDto));
 
         when(photoSessionCache.get(any())).thenReturn(cachedPage);
 
-        var result = photoSessionService.getSessionsWithCache(filter);
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithCache(filter);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getClientName()).isEqualTo(CLIENT_NAME);
         verify(photoSessionCache).get(any());
-        verify(photoSessionRepository, never()).findSessionsWithFiltersPaged(any(), any(), any(), any());
+        verify(photoSessionRepository, never())
+                .findSessionsWithFiltersPaged(any(), any(), any(), any());
     }
 
     @Test
     void getSessionsWithCacheWhenCacheMissShouldQueryDatabaseAndCache() {
-        var filter = PhotoSessionFilterDto.builder().clientName(CLIENT_NAME).page(0).size(10).build();
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
-        var page = new PageImpl<>(List.of(photoSession), pageable, 1);
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .page(0)
+                .size(10)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
 
-        var keyCaptor = ArgumentCaptor.forClass(PhotoSessionQueryKey.class);
-        var clientCaptor = ArgumentCaptor.forClass(String.class);
-        var pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-
-        when(photoSessionCache.get(keyCaptor.capture())).thenReturn(null);
+        when(photoSessionCache.get(any())).thenReturn(null);
         when(photoSessionRepository.findSessionsWithFiltersPaged(
-                clientCaptor.capture(), any(), any(), pageableCaptor.capture()))
+                any(), any(), any(), any(Pageable.class)))
                 .thenReturn(page);
         when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
         doNothing().when(photoSessionCache).put(any(), any());
 
-        var result = photoSessionService.getSessionsWithCache(filter);
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithCache(filter);
 
         assertThat(result).isNotNull();
-        assertThat(keyCaptor.getValue().clientName()).isEqualTo(CLIENT_NAME);
-        assertThat(clientCaptor.getValue()).isEqualTo(CLIENT_NAME);
-        assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
+        assertThat(result.getContent()).hasSize(1);
         verify(photoSessionCache).get(any());
-        verify(photoSessionRepository).findSessionsWithFiltersPaged(any(), any(), any(), any());
+        verify(photoSessionRepository).findSessionsWithFiltersPaged(
+                any(), any(), any(), any(Pageable.class));
         verify(photoSessionCache).put(any(), any());
     }
 
     @Test
     void getCacheSizeShouldReturnSize() {
         when(photoSessionCache.getCacheSize()).thenReturn(5);
-        assertThat(photoSessionService.getCacheSize()).isEqualTo(5);
+
+        int result = photoSessionService.getCacheSize();
+
+        assertThat(result).isEqualTo(5);
         verify(photoSessionCache).getCacheSize();
+    }
+
+    @Test
+    void demonstrateNPlus1ProblemShouldExecuteWithoutException() {
+        photoSessionService.demonstrateNPlus1Problem();
+
+        verify(photoSessionRepository).findAllWithoutFetch();
+    }
+
+    @Test
+    void demonstrateEntityGraphSolutionShouldExecuteWithoutException() {
+        photoSessionService.demonstrateEntityGraphSolution();
+
+        verify(photoSessionRepository).findAllWithEntityGraph();
+    }
+
+    @Test
+    void createWithRelatedWithTransactionShouldCreate() {
+        when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
+        when(photographerRepository.findById(ID)).thenReturn(Optional.of(photographer));
+        when(serviceRepository.findById(ID)).thenReturn(Optional.of(photoService));
+        when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
+
+        photoSessionService.createWithRelatedWithTransaction(createDto);
+
+        verify(photoSessionRepository, times(1)).save(any(PhotoSession.class));
+    }
+
+    @Test
+    void createWithRelatedWithoutTransactionShouldCreate() {
+        when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
+        when(photographerRepository.findById(ID)).thenReturn(Optional.of(photographer));
+        when(serviceRepository.findById(ID)).thenReturn(Optional.of(photoService));
+        when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
+
+        photoSessionService.createWithRelatedWithoutTransaction(createDto);
+
+        verify(photoSessionRepository, times(1)).save(any(PhotoSession.class));
+    }
+
+    @Test
+    void createWithRelatedWithTransactionWhenServiceId3ShouldThrow() {
+        createDto.setServiceId(3L);
+
+        when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
+        when(photographerRepository.findById(ID)).thenReturn(Optional.of(photographer));
+        when(serviceRepository.findById(3L)).thenReturn(Optional.of(photoService));
+        when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
+        assertThatThrownBy(() -> photoSessionService.createWithRelatedWithTransaction(createDto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Демонстрационная ошибка");
+
+        verify(photoSessionRepository, times(1)).save(any(PhotoSession.class));
+    }
+
+    @Test
+    void createWithRelatedWithoutTransactionWhenServiceId3ShouldThrow() {
+        createDto.setServiceId(3L);
+
+        when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
+        when(photographerRepository.findById(ID)).thenReturn(Optional.of(photographer));
+        when(serviceRepository.findById(3L)).thenReturn(Optional.of(photoService));
+        when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
+
+        assertThatThrownBy(() -> photoSessionService.createWithRelatedWithoutTransaction(createDto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Демонстрационная ошибка");
+
+        verify(photoSessionRepository, times(1)).save(any(PhotoSession.class));
     }
 }

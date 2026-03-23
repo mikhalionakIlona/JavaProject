@@ -37,6 +37,25 @@ public class ClientService {
                 .orElse(null);
     }
 
+    public ClientDto getClientByEmail(String email) {
+        return repository.findAll()
+                .stream()
+                .filter(client -> client.getEmail() != null)
+                .filter(client -> client.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .map(mapper::toDto)
+                .orElse(null);
+    }
+
+    public List<ClientDto> getClientsByPhonePattern(String pattern) {
+        return repository.findAll()
+                .stream()
+                .filter(client -> client.getPhone() != null)
+                .filter(client -> client.getPhone().contains(pattern))
+                .map(mapper::toDto)
+                .toList();
+    }
+
     @Transactional
     public ClientDto createClient(ClientCreateDto createDto) {
         Client client = Client.builder()
@@ -52,10 +71,18 @@ public class ClientService {
     public ClientDto updateClient(Long id, ClientUpdateDto updateDto) {
         return repository.findById(id)
                 .map(client -> {
-                    client.setFirstName(updateDto.getFirstName());
-                    client.setLastName(updateDto.getLastName());
-                    client.setPhone(updateDto.getPhone());
-                    client.setEmail(updateDto.getEmail());
+                    if (updateDto.getFirstName() != null) {
+                        client.setFirstName(updateDto.getFirstName());
+                    }
+                    if (updateDto.getLastName() != null) {
+                        client.setLastName(updateDto.getLastName());
+                    }
+                    if (updateDto.getPhone() != null) {
+                        client.setPhone(updateDto.getPhone());
+                    }
+                    if (updateDto.getEmail() != null) {
+                        client.setEmail(updateDto.getEmail());
+                    }
                     return mapper.toDto(repository.save(client));
                 })
                 .orElse(null);
@@ -102,8 +129,8 @@ public class ClientService {
 
         if (createDto.size() > MAX_BULK_SIZE) {
             throw new NoSuchElementException(
-                    "Превышен лимит в " + MAX_BULK_SIZE + " клиентов. " +
-                            "Транзакция будет откачена"
+                    "Превышен лимит в " + MAX_BULK_SIZE + " клиентов. "
+                            + "Транзакция будет откачена"
             );
         }
 
@@ -122,8 +149,8 @@ public class ClientService {
 
         if (createDto.size() > MAX_BULK_SIZE) {
             throw new NoSuchElementException(
-                    "Превышен лимит в " + MAX_BULK_SIZE + " клиентов. " +
-                            "Данные уже сохранены в БД"
+                    "Превышен лимит в " + MAX_BULK_SIZE + " клиентов. "
+                            + "Данные уже сохранены в БД"
             );
         }
 

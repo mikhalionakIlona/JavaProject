@@ -20,8 +20,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyLong;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -230,5 +230,51 @@ class ClientServiceTest {
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Данные уже сохранены");
         verify(clientRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void getClientByEmailWhenExistsShouldReturnClient() {
+        List<Client> clients = List.of(client);
+        when(clientRepository.findAll()).thenReturn(clients);
+        when(clientMapper.toDto(client)).thenReturn(clientDto);
+
+        ClientDto result = clientService.getClientByEmail(EMAIL);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getEmail()).isEqualTo(EMAIL);
+        verify(clientRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getClientByEmailWhenNotExistsShouldReturnNull() {
+        when(clientRepository.findAll()).thenReturn(List.of());
+
+        ClientDto result = clientService.getClientByEmail("notexists@mail.com");
+
+        assertThat(result).isNull();
+        verify(clientRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getClientsByPhonePatternShouldReturnFilteredList() {
+        List<Client> clients = List.of(client);
+        when(clientRepository.findAll()).thenReturn(clients);
+        when(clientMapper.toDto(client)).thenReturn(clientDto);
+
+        List<ClientDto> result = clientService.getClientsByPhonePattern("123");
+
+        assertThat(result).hasSize(1);
+        verify(clientRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getClientsByPhonePatternWhenNoMatchShouldReturnEmptyList() {
+        List<Client> clients = List.of(client);
+        when(clientRepository.findAll()).thenReturn(clients);
+
+        List<ClientDto> result = clientService.getClientsByPhonePattern("999");
+
+        assertThat(result).isEmpty();
+        verify(clientRepository, times(1)).findAll();
     }
 }
