@@ -38,6 +38,9 @@ public class ClientService {
     }
 
     public ClientDto getClientByEmail(String email) {
+        if (email == null) {
+            return null;
+        }
         return repository.findAll()
                 .stream()
                 .filter(client -> client.getEmail() != null)
@@ -48,6 +51,9 @@ public class ClientService {
     }
 
     public List<ClientDto> getClientsByPhonePattern(String pattern) {
+        if (pattern == null) {
+            return List.of();
+        }
         return repository.findAll()
                 .stream()
                 .filter(client -> client.getPhone() != null)

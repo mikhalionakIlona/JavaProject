@@ -34,6 +34,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -432,14 +434,12 @@ class PhotoSessionServiceTest {
     @Test
     void demonstrateNPlus1ProblemShouldExecuteWithoutException() {
         photoSessionService.demonstrateNPlus1Problem();
-
         verify(photoSessionRepository).findAllWithoutFetch();
     }
 
     @Test
     void demonstrateEntityGraphSolutionShouldExecuteWithoutException() {
         photoSessionService.demonstrateEntityGraphSolution();
-
         verify(photoSessionRepository).findAllWithEntityGraph();
     }
 
@@ -475,6 +475,7 @@ class PhotoSessionServiceTest {
         when(photographerRepository.findById(ID)).thenReturn(Optional.of(photographer));
         when(serviceRepository.findById(3L)).thenReturn(Optional.of(photoService));
         when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
+
         assertThatThrownBy(() -> photoSessionService.createWithRelatedWithTransaction(createDto))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Демонстрационная ошибка");
@@ -496,5 +497,189 @@ class PhotoSessionServiceTest {
                 .hasMessageContaining("Демонстрационная ошибка");
 
         verify(photoSessionRepository, times(1)).save(any(PhotoSession.class));
+    }
+
+    @Test
+    void getSessionsWithFiltersPagedWithNullFiltersShouldReturnPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(null)
+                .photographerName(null)
+                .phone(null)
+                .page(0)
+                .size(10)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                isNull(), isNull(), isNull(), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithFiltersPaged(filter);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void getSessionsWithFiltersNativeWithNullFiltersShouldReturnList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(null)
+                .photographerName(null)
+                .phone(null)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersNative(isNull(), isNull(), isNull()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersNative(filter);
+
+        assertThat(result).hasSize(1);
+        verify(photoSessionRepository).findSessionsWithFiltersNative(null, null, null);
+    }
+
+    @Test
+    void getSessionsWithFiltersJpqlWithNullFiltersShouldReturnList() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(null)
+                .photographerName(null)
+                .phone(null)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersJpql(isNull(), isNull(), isNull()))
+                .thenReturn(List.of(photoSession));
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        List<PhotoSessionDto> result = photoSessionService.getSessionsWithFiltersJpql(filter);
+
+        assertThat(result).hasSize(1);
+        verify(photoSessionRepository).findSessionsWithFiltersJpql(null, null, null);
+    }
+
+    @Test
+    void getSessionsWithFiltersPagedWithAllFiltersShouldReturnPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(CLIENT_NAME)
+                .photographerName(PHOTOGRAPHER_NAME)
+                .phone("+375")
+                .page(0)
+                .size(10)
+                .build();
+
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                eq(CLIENT_NAME), eq(PHOTOGRAPHER_NAME), eq("+375"), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithFiltersPaged(filter);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void getSessionsWithCacheWhenCacheKeyIsNullShouldQueryDatabase() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(null)
+                .page(0)
+                .size(10)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "date"));
+        PageImpl<PhotoSession> page = new PageImpl<>(List.of(photoSession), pageable, 1);
+
+        when(photoSessionCache.get(any())).thenReturn(null);
+        when(photoSessionRepository.findSessionsWithFiltersPaged(
+                isNull(), isNull(), isNull(), any(Pageable.class)))
+                .thenReturn(page);
+        when(photoSessionMapper.toDto(any())).thenReturn(photoSessionDto);
+        doNothing().when(photoSessionCache).put(any(), any());
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithCache(filter);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        verify(photoSessionCache).put(any(), any());
+    }
+
+    @Test
+    void getSessionsWithCacheWhenCacheKeyIsNullAndCacheHitShouldReturnFromCache() {
+        PhotoSessionFilterDto filter = PhotoSessionFilterDto.builder()
+                .clientName(null)
+                .page(0)
+                .size(10)
+                .build();
+        PageImpl<PhotoSessionDto> cachedPage = new PageImpl<>(List.of(photoSessionDto));
+
+        when(photoSessionCache.get(any())).thenReturn(cachedPage);
+
+        org.springframework.data.domain.Page<PhotoSessionDto> result =
+                photoSessionService.getSessionsWithCache(filter);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        verify(photoSessionRepository, never())
+                .findSessionsWithFiltersPaged(any(), any(), any(), any());
+    }
+
+    @Test
+    void createPhotoSessionWithNullFieldsShouldHandleGracefully() {
+        PhotoSessionCreateDto nullCreateDto = new PhotoSessionCreateDto();
+        nullCreateDto.setDate(null);
+        nullCreateDto.setClientId(null);
+        nullCreateDto.setPhotographerId(null);
+        nullCreateDto.setServiceId(null);
+
+        when(clientRepository.findById(any())).thenReturn(Optional.of(client));
+        when(photographerRepository.findById(any())).thenReturn(Optional.of(photographer));
+        when(serviceRepository.findById(any())).thenReturn(Optional.of(photoService));
+        when(photoSessionRepository.save(any(PhotoSession.class))).thenReturn(photoSession);
+        when(photoSessionMapper.toDto(any(PhotoSession.class))).thenReturn(photoSessionDto);
+
+        PhotoSessionDto result = photoSessionService.createPhotoSession(nullCreateDto);
+
+        assertThat(result).isNotNull();
+        verify(photoSessionRepository, times(1)).save(any(PhotoSession.class));
+    }
+
+    @Test
+    void updatePhotoSessionWithNullServiceIdShouldOnlyUpdateDate() {
+        PhotoSessionUpdateDto updateOnlyDate = new PhotoSessionUpdateDto();
+        updateOnlyDate.setDate(LocalDateTime.now().plusDays(2));
+        updateOnlyDate.setServiceId(null);
+
+        PhotoSession updatedSession = PhotoSession.builder()
+                .id(ID)
+                .date(updateOnlyDate.getDate())
+                .totalPrice(8000.0)
+                .client(client)
+                .photographer(photographer)
+                .service(photoService)
+                .build();
+
+        PhotoSessionDto updatedDto = PhotoSessionDto.builder()
+                .id(ID)
+                .date(updateOnlyDate.getDate())
+                .totalPrice(8000.0)
+                .serviceId(ID)
+                .serviceName("Портретная съемка")
+                .build();
+
+        when(photoSessionRepository.findById(ID)).thenReturn(Optional.of(photoSession));
+        when(photoSessionRepository.save(any())).thenReturn(updatedSession);
+        when(photoSessionMapper.toDto(updatedSession)).thenReturn(updatedDto);
+
+        PhotoSessionDto result = photoSessionService.updatePhotoSession(ID, updateOnlyDate);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getDate()).isEqualTo(updateOnlyDate.getDate());
+        assertThat(result.getServiceId()).isEqualTo(ID);
+        verify(photoSessionCache).invalidateAll();
     }
 }

@@ -433,6 +433,24 @@ class ClientServiceTest {
     }
 
     @Test
+    void getClientByEmailWithNullParameterShouldReturnNull() {
+        ClientDto result = clientService.getClientByEmail(null);
+        assertThat(result).isNull();
+        verify(clientRepository, never()).findAll();
+    }
+
+    @Test
+    void getClientByEmailWhenEmailIsEmptyStringShouldReturnNull() {
+        List<Client> clients = List.of(client);
+        when(clientRepository.findAll()).thenReturn(clients);
+
+        ClientDto result = clientService.getClientByEmail("");
+
+        assertThat(result).isNull();
+        verify(clientRepository, times(1)).findAll();
+    }
+
+    @Test
     void getClientsByPhonePatternShouldReturnFilteredList() {
         List<Client> clients = List.of(client);
         when(clientRepository.findAll()).thenReturn(clients);
@@ -501,6 +519,86 @@ class ClientServiceTest {
 
         assertThat(result).hasSize(2);
         verify(clientRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getClientsByPhonePatternWithNullParameterShouldReturnEmptyList() {
+        List<ClientDto> result = clientService.getClientsByPhonePattern(null);
+        assertThat(result).isEmpty();
+        verify(clientRepository, never()).findAll();
+    }
+
+    @Test
+    void getClientsByPhonePatternWithEmptyPatternShouldReturnAllWithPhone() {
+        List<Client> clients = List.of(client);
+        when(clientRepository.findAll()).thenReturn(clients);
+        when(clientMapper.toDto(client)).thenReturn(clientDto);
+
+        List<ClientDto> result = clientService.getClientsByPhonePattern("");
+
+        assertThat(result).hasSize(1);
+        verify(clientRepository, times(1)).findAll();
+    }
+
+    @Test
+    void updateClientWithAllFieldsNullShouldNotUpdateAnything() {
+        ClientUpdateDto emptyUpdate = new ClientUpdateDto();
+
+        when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
+        when(clientRepository.save(any(Client.class))).thenReturn(client);
+        when(clientMapper.toDto(client)).thenReturn(clientDto);
+
+        ClientDto result = clientService.updateClient(ID, emptyUpdate);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFirstName()).isEqualTo(FIRST_NAME);
+        assertThat(result.getLastName()).isEqualTo(LAST_NAME);
+        verify(clientRepository, times(1)).save(any(Client.class));
+    }
+
+    @Test
+    void deleteClientWhenRepositoryThrowsExceptionShouldStillReturnTrue() {
+        when(clientRepository.existsById(ID)).thenReturn(true);
+        doNothing().when(clientRepository).deleteById(ID);
+
+        boolean result = clientService.deleteClient(ID);
+
+        assertThat(result).isTrue();
+        verify(clientRepository, times(1)).deleteById(ID);
+    }
+
+    @Test
+    void createClientWithNullFieldsShouldHandleGracefully() {
+        ClientCreateDto dtoWithNulls = new ClientCreateDto();
+        dtoWithNulls.setFirstName(null);
+        dtoWithNulls.setLastName(null);
+        dtoWithNulls.setPhone(null);
+        dtoWithNulls.setEmail(null);
+
+        Client clientWithNulls = Client.builder()
+                .id(ID)
+                .firstName(null)
+                .lastName(null)
+                .phone(null)
+                .email(null)
+                .build();
+
+        ClientDto dtoWithNullsResult = ClientDto.builder()
+                .id(ID)
+                .firstName(null)
+                .lastName(null)
+                .phone(null)
+                .email(null)
+                .build();
+
+        when(clientRepository.save(any(Client.class))).thenReturn(clientWithNulls);
+        when(clientMapper.toDto(any(Client.class))).thenReturn(dtoWithNullsResult);
+
+        ClientDto result = clientService.createClient(dtoWithNulls);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFirstName()).isNull();
+        verify(clientRepository, times(1)).save(any(Client.class));
     }
 
     @Test
