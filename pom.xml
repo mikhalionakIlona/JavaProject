@@ -27,14 +27,12 @@
         <springdoc.version>2.3.0</springdoc.version>
         <jacoco.version>0.8.12</jacoco.version>
 
-        <!-- SonarCloud настройки -->
         <sonar.projectKey>mikhalionakIlona_JavaProject</sonar.projectKey>
         <sonar.projectName>JavaProject</sonar.projectName>
         <sonar.organization>mikhalionakilona</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
-        <!-- Исключаем всё, кроме сервисов, из отчёта покрытия -->
         <sonar.coverage.exclusions>
             src/main/java/com/example/photostudio/PhotostudioApplication.java,
             src/main/java/com/example/photostudio/controller/**,
@@ -44,10 +42,10 @@
             src/main/java/com/example/photostudio/cache/**,
             src/main/java/com/example/photostudio/mapper/**,
             src/main/java/com/example/photostudio/model/**,
-            src/main/java/com/example/photostudio/repository/**
+            src/main/java/com/example/photostudio/repository/**,
+            src/main/java/com/example/photostudio/dto/**
         </sonar.coverage.exclusions>
 
-        <!-- Показываем только сервисы -->
         <sonar.coverage.inclusions>
             src/main/java/com/example/photostudio/service/**/*.java
         </sonar.coverage.inclusions>
