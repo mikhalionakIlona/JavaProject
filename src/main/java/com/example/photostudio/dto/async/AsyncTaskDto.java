@@ -1,4 +1,4 @@
-package com.example.photostudio.dto;
+package com.example.photostudio.dto.async;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +17,6 @@ public class AsyncTaskDto {
     private String message;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Integer processedCount;
-    private Integer totalCount;
+    private Long clientId;
+    private String clientName;
 }
