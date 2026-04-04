@@ -13,133 +13,72 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RaceConditionDemoService {
 
-    private static final String LOST_INCREMENT_MESSAGE = "Потеряно инкрементов: {}";
-    private static final String TIME_MESSAGE = "Время выполнения: {} ms";
-    private static final String TIMEOUT_WARNING = "Таймаут ожидания завершения потоков";
-    private static final String UNSAFE_COUNTER_LOG = "НЕПОТОКОБЕЗОПАСНЫЙ счетчик: {} (ожидалось: {})";
-    private static final String SYNC_COUNTER_LOG = "SYNCHRONIZED счетчик: {} (ожидалось: {})";
-    private static final String ATOMIC_COUNTER_LOG = "ATOMIC счетчик: {} (ожидалось: {})";
-    private static final String RACE_CONDITION_START = "=== ДЕМОНСТРАЦИЯ RACE CONDITION ===";
-    private static final String SYNC_SOLUTION_START = "=== РЕШЕНИЕ RACE CONDITION ЧЕРЕЗ SYNCHRONIZED ===";
-    private static final String ATOMIC_SOLUTION_START = "=== РЕШЕНИЕ RACE CONDITION ЧЕРЕЗ ATOMIC ===";
-    private static final String THREAD_START_LOG = "Запуск {} потоков, каждый делает {} инкрементов";
-    private static final String EXPECTED_VALUE_LOG = "Ожидаемое значение: {}";
-    private static final int THREAD_COUNT = 100;
-    private static final int INCREMENTS_PER_THREAD = 1000;
-
     private final CounterService counterService;
-    private final IncrementOperation unsafeOperation = new UnsafeOperation();
-    private final IncrementOperation syncOperation = new SyncOperation();
-    private final IncrementOperation atomicOperation = new AtomicOperation();
 
-    private int runIncrementTest(String startLog, String resultLog, IncrementOperation operation)
-            throws InterruptedException {
-        log.info(startLog);
+    public String demonstrateRaceCondition() throws InterruptedException {
+        return executeTest(false);
+    }
+
+    public String demonstrateSolution() throws InterruptedException {
+        return executeTest(true);
+    }
+
+    private String executeTest(boolean useAtomic) throws InterruptedException {
         counterService.resetCounters();
 
-        int expectedTotal = THREAD_COUNT * INCREMENTS_PER_THREAD;
+        int threadCount = 100;
+        int incrementsPerThread = 1000;
+        int expectedTotal = threadCount * incrementsPerThread;
 
-        log.info(THREAD_START_LOG, THREAD_COUNT, INCREMENTS_PER_THREAD);
-        log.info(EXPECTED_VALUE_LOG, expectedTotal);
+        String testType = useAtomic ? "РЕШЕНИЕ ЧЕРЕЗ ATOMIC" : "ДЕМОНСТРАЦИЯ RACE CONDITION";
+        log.info("=== {} ===", testType);
+        log.info("Потоков: {}, инкрементов на поток: {}, ожидаемое значение: {}",
+                threadCount, incrementsPerThread, expectedTotal);
 
         long startTime = System.currentTimeMillis();
 
-        try (ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT)) {
-            for (int i = 0; i < THREAD_COUNT; i++) {
+        // Используем try-with-resources для автоматического закрытия ExecutorService
+        try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
+
+            for (int i = 0; i < threadCount; i++) {
                 executor.submit(() -> {
-                    for (int j = 0; j < INCREMENTS_PER_THREAD; j++) {
-                        operation.increment();
+                    for (int j = 0; j < incrementsPerThread; j++) {
+                        if (useAtomic) {
+                            counterService.incrementAtomic();
+                        } else {
+                            counterService.incrementUnsafe();
+                        }
                     }
                 });
             }
+
             executor.shutdown();
-            boolean terminated = executor.awaitTermination(1, TimeUnit.MINUTES);
-            if (!terminated) {
-                log.warn(TIMEOUT_WARNING);
+
+            boolean finished = executor.awaitTermination(1, TimeUnit.MINUTES);
+
+            long endTime = System.currentTimeMillis();
+
+            if (!finished) {
+                executor.shutdownNow();
+                return "ОШИБКА: Таймаут выполнения";
+            }
+
+            long result = useAtomic ? counterService.getAtomicCounter() : counterService.getUnsafeCounter();
+            long lost = expectedTotal - result;
+
+            String prefix = useAtomic ? "ATOMIC РЕШЕНИЕ" : "RACE CONDITION ПРОБЛЕМА";
+
+            log.info("{} результат: {} (ожидалось: {})", prefix, result, expectedTotal);
+            log.info("Потеряно инкрементов: {}", lost);
+            log.info("Время выполнения: {} ms", endTime - startTime);
+
+            if (useAtomic) {
+                return String.format("Atomic решение: результат=%d (ожидалось=%d, потеряно=%d, время=%d ms)",
+                        result, expectedTotal, lost, endTime - startTime);
+            } else {
+                return String.format("Race condition проблема: результат=%d (ожидалось=%d, потеряно=%d, время=%d ms)",
+                        result, expectedTotal, lost, endTime - startTime);
             }
         }
-
-        long endTime = System.currentTimeMillis();
-        int result = operation.getResult();
-        int lost = expectedTotal - result;
-
-        log.info(resultLog, result, expectedTotal);
-        log.info(LOST_INCREMENT_MESSAGE, lost);
-        log.info(TIME_MESSAGE, endTime - startTime);
-
-        return result;
-    }
-
-    private interface IncrementOperation {
-        void increment();
-        int getResult();
-    }
-
-    private class UnsafeOperation implements IncrementOperation {
-        @Override
-        public void increment() {
-            counterService.incrementUnsafe();
-        }
-        @Override
-        public int getResult() {
-            return counterService.getUnsafeCounter();
-        }
-    }
-
-    private class SyncOperation implements IncrementOperation {
-        @Override
-        public void increment() {
-            counterService.incrementSync();
-        }
-        @Override
-        public int getResult() {
-            return counterService.getSyncCounter();
-        }
-    }
-
-    private class AtomicOperation implements IncrementOperation {
-        @Override
-        public void increment() {
-            counterService.incrementAtomic();
-        }
-        @Override
-        public int getResult() {
-            return counterService.getAtomicCounter();
-        }
-    }
-
-    public String demonstrateRaceCondition() throws InterruptedException {
-        int result = runIncrementTest(
-                RACE_CONDITION_START, UNSAFE_COUNTER_LOG, unsafeOperation);
-        int expectedTotal = THREAD_COUNT * INCREMENTS_PER_THREAD;
-        return String.format("Race condition результат: %d (потеряно %d инкрементов)",
-                result, expectedTotal - result);
-    }
-
-    public String demonstrateSynchronizedSolution() throws InterruptedException {
-        int result = runIncrementTest(
-                SYNC_SOLUTION_START, SYNC_COUNTER_LOG, syncOperation);
-        int expectedTotal = THREAD_COUNT * INCREMENTS_PER_THREAD;
-        return String.format("Synchronized результат: %d (потеряно %d)",
-                result, expectedTotal - result);
-    }
-
-    public String demonstrateAtomicSolution() throws InterruptedException {
-        int result = runIncrementTest(
-                ATOMIC_SOLUTION_START, ATOMIC_COUNTER_LOG, atomicOperation);
-        int expectedTotal = THREAD_COUNT * INCREMENTS_PER_THREAD;
-        return String.format("Atomic результат: %d (потеряно %d)",
-                result, expectedTotal - result);
-    }
-
-    public String demonstrateAllApproaches() throws InterruptedException {
-        return "=== СРАВНЕНИЕ ПОДХОДОВ К ПОТОКОБЕЗОПАСНОСТИ ===\n\n"
-                + "1. " + demonstrateRaceCondition() + "\n\n"
-                + "2. " + demonstrateSynchronizedSolution() + "\n\n"
-                + "3. " + demonstrateAtomicSolution() + "\n\n"
-                + "=== ВЫВОД ===\n"
-                + "Race condition: значения теряются из-за отсутствия синхронизации\n"
-                + "Synchronized: медленнее, но гарантирует корректность\n"
-                + "Atomic: быстрее synchronized, также гарантирует корректность\n";
     }
 }

@@ -1,10 +1,12 @@
 package com.example.photostudio.service.async;
 
-import com.example.photostudio.dto.async.AsyncTaskDto;
-import com.example.photostudio.model.Client;
-import com.example.photostudio.repository.ClientRepository;
+import com.example.photostudio.dto.async.AsyncTaskResponse;
+import com.example.photostudio.dto.client.ClientCreateDto;
+import com.example.photostudio.dto.client.ClientDto;
+import com.example.photostudio.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -20,67 +21,61 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class AsyncClientService {
 
-    private final ClientRepository clientRepository;
+    private final ClientService clientService;
+    private final ApplicationContext applicationContext;
+    private final Map<String, AsyncTaskResponse> taskStore = new ConcurrentHashMap<>();
 
-    private final Map<String, AsyncTaskDto> tasks = new ConcurrentHashMap<>();
-
-    @Async
-    @Transactional
-    public CompletableFuture<String> createClientAsync(String firstName, String lastName, String phone, String email) {
+    public String createClientAsync(ClientCreateDto request) {
         String taskId = UUID.randomUUID().toString();
-        log.info("Асинхронная задача создана: {}", taskId);
 
-        AsyncTaskDto task = AsyncTaskDto.builder()
+        AsyncTaskResponse response = AsyncTaskResponse.builder()
                 .taskId(taskId)
                 .status("IN_PROGRESS")
+                .createdAt(LocalDateTime.now())
                 .message("Создание клиента начато...")
-                .startTime(LocalDateTime.now())
-                .clientName(firstName + " " + lastName)
                 .build();
-        tasks.put(taskId, task);
+        taskStore.put(taskId, response);
+
+        AsyncClientService proxy = applicationContext.getBean(AsyncClientService.class);
+        proxy.executeAsync(taskId, request);
+
+        return taskId;
+    }
+
+    @Async("taskExecutor")
+    @Transactional
+    public void executeAsync(String taskId, ClientCreateDto request) {
+        log.info("Асинхронная задача {} начата для клиента: {} {}",
+                taskId, request.getFirstName(), request.getLastName());
 
         try {
-            Thread.sleep(3000);
+            ClientDto result = clientService.createClient(request);
 
-            Client client = Client.builder()
-                    .firstName(firstName)
-                    .lastName(lastName)
-                    .phone(phone)
-                    .email(email)
-                    .build();
+            AsyncTaskResponse response = taskStore.get(taskId);
+            response.setStatus("COMPLETED");
+            response.setCompletedAt(LocalDateTime.now());
+            response.setResult(result);
+            response.setClientId(result.getId());
+            response.setClientName(result.getFirstName() + " " + result.getLastName());
+            response.setMessage("Клиент успешно создан с ID: " + result.getId());
 
-            Client savedClient = clientRepository.save(client);
-
-            task.setStatus("COMPLETED");
-            task.setMessage("Клиент успешно создан с ID: " + savedClient.getId());
-            task.setEndTime(LocalDateTime.now());
-            task.setClientId(savedClient.getId());
-
-            log.info("Асинхронная задача {} завершена, создан клиент ID: {}", taskId, savedClient.getId());
-            return CompletableFuture.completedFuture(taskId);
-
-        } catch (InterruptedException e) {
-            log.error("Асинхронная задача {} прервана: {}", taskId, e.getMessage());
-            task.setStatus("FAILED");
-            task.setMessage("Задача прервана");
-            task.setEndTime(LocalDateTime.now());
-            Thread.currentThread().interrupt();
-            return CompletableFuture.completedFuture(taskId);
+            log.info("Асинхронная задача {} завершена успешно. ID созданного клиента: {}", taskId, result.getId());
 
         } catch (Exception e) {
-            log.error("Ошибка при выполнении асинхронной задачи {}: {}", taskId, e.getMessage());
-            task.setStatus("FAILED");
-            task.setMessage("Ошибка: " + e.getMessage());
-            task.setEndTime(LocalDateTime.now());
-            return CompletableFuture.completedFuture(taskId);
+            log.error("Ошибка в асинхронной задаче {}: {}", taskId, e.getMessage());
+            AsyncTaskResponse response = taskStore.get(taskId);
+            response.setStatus("FAILED");
+            response.setCompletedAt(LocalDateTime.now());
+            response.setError(e.getMessage());
+            response.setMessage("Ошибка при создании клиента: " + e.getMessage());
         }
     }
 
-    public AsyncTaskDto getTaskStatus(String taskId) {
-        return tasks.get(taskId);
+    public AsyncTaskResponse getTaskStatus(String taskId) {
+        return taskStore.get(taskId);
     }
 
-    public Map<String, AsyncTaskDto> getAllTasks() {
-        return tasks;
+    public Map<String, AsyncTaskResponse> getAllTasks() {
+        return taskStore;
     }
 }

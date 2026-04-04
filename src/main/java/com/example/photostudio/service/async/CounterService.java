@@ -1,44 +1,32 @@
 package com.example.photostudio.service.async;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
-@Slf4j
 @Service
 public class CounterService {
 
-    private final AtomicInteger atomicCounter = new AtomicInteger(0);
     @Getter
-    private int syncCounter = 0;
-    @Getter
-    private int unsafeCounter = 0;
+    private long unsafeCounter = 0;
 
-    public int incrementAtomic() {
-        return atomicCounter.incrementAndGet();
+    private final AtomicLong atomicCounter = new AtomicLong(0);
+
+    public void incrementUnsafe() {
+        unsafeCounter++;
     }
 
-    public synchronized int incrementSync() {
-        syncCounter++;
-        return syncCounter;
+    public void incrementAtomic() {
+        atomicCounter.incrementAndGet();
     }
 
-    public int incrementUnsafe() {
-        int current = unsafeCounter;
-        unsafeCounter = current + 1;
-        return unsafeCounter;
-    }
-
-    public int getAtomicCounter() {
+    public long getAtomicCounter() {
         return atomicCounter.get();
     }
 
     public void resetCounters() {
-        atomicCounter.set(0);
-        syncCounter = 0;
         unsafeCounter = 0;
-        log.info("Все счётчики сброшены");
+        atomicCounter.set(0);
     }
 }

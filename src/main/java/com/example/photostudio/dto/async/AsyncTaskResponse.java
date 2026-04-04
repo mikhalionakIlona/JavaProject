@@ -11,12 +11,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AsyncTaskDto {
+public class AsyncTaskResponse {
     private String taskId;
     private String status;
     private String message;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDateTime createdAt;
+    private LocalDateTime completedAt;
     private Long clientId;
     private String clientName;
+    private Object result;
+    private String error;
 }
