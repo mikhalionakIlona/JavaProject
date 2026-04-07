@@ -36,8 +36,6 @@ public class RaceConditionDemoService {
                 threadCount, incrementsPerThread, expectedTotal);
 
         long startTime = System.currentTimeMillis();
-
-        // Используем try-with-resources для автоматического закрытия ExecutorService
         try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
 
             for (int i = 0; i < threadCount; i++) {
