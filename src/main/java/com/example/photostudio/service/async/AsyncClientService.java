@@ -49,6 +49,9 @@ public class AsyncClientService {
                 taskId, request.getFirstName(), request.getLastName());
 
         try {
+            log.info("Задержка 15 секунд перед созданием клиента...");
+            Thread.sleep(15000);
+
             ClientDto result = clientService.createClient(request);
 
             AsyncTaskResponse response = taskStore.get(taskId);
@@ -61,6 +64,14 @@ public class AsyncClientService {
 
             log.info("Асинхронная задача {} завершена успешно. ID созданного клиента: {}", taskId, result.getId());
 
+        } catch (InterruptedException e) {
+            log.error("Асинхронная задача {} была прервана", taskId);
+            Thread.currentThread().interrupt();
+            AsyncTaskResponse response = taskStore.get(taskId);
+            response.setStatus("FAILED");
+            response.setCompletedAt(LocalDateTime.now());
+            response.setError("Задача была прервана");
+            response.setMessage("Операция прервана");
         } catch (Exception e) {
             log.error("Ошибка в асинхронной задаче {}: {}", taskId, e.getMessage());
             AsyncTaskResponse response = taskStore.get(taskId);
