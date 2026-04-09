@@ -23,14 +23,14 @@ public class RaceConditionDemoService {
         return executeTest(true);
     }
 
-    private String executeTest(boolean useAtomic) throws InterruptedException {
+    private String executeTest(boolean useSynchronized) throws InterruptedException {
         counterService.resetCounters();
 
         int threadCount = 100;
         int incrementsPerThread = 1000;
         int expectedTotal = threadCount * incrementsPerThread;
 
-        String testType = useAtomic ? "РЕШЕНИЕ ЧЕРЕЗ ATOMIC" : "ДЕМОНСТРАЦИЯ RACE CONDITION";
+        String testType = useSynchronized ? "РЕШЕНИЕ ЧЕРЕЗ SYNCHRONIZED" : "ДЕМОНСТРАЦИЯ RACE CONDITION";
         log.info("=== {} ===", testType);
         log.info("Потоков: {}, инкрементов на поток: {}, ожидаемое значение: {}",
                 threadCount, incrementsPerThread, expectedTotal);
@@ -41,8 +41,8 @@ public class RaceConditionDemoService {
             for (int i = 0; i < threadCount; i++) {
                 executor.submit(() -> {
                     for (int j = 0; j < incrementsPerThread; j++) {
-                        if (useAtomic) {
-                            counterService.incrementAtomic();
+                        if (useSynchronized) {
+                            counterService.incrementSync();
                         } else {
                             counterService.incrementUnsafe();
                         }
@@ -61,17 +61,17 @@ public class RaceConditionDemoService {
                 return "ОШИБКА: Таймаут выполнения";
             }
 
-            long result = useAtomic ? counterService.getAtomicCounter() : counterService.getUnsafeCounter();
+            long result = useSynchronized ? counterService.getSyncCounter() : counterService.getUnsafeCounter();
             long lost = expectedTotal - result;
 
-            String prefix = useAtomic ? "ATOMIC РЕШЕНИЕ" : "RACE CONDITION ПРОБЛЕМА";
+            String prefix = useSynchronized ? "SYNCHRONIZED РЕШЕНИЕ" : "RACE CONDITION ПРОБЛЕМА";
 
             log.info("{} результат: {} (ожидалось: {})", prefix, result, expectedTotal);
             log.info("Потеряно инкрементов: {}", lost);
             log.info("Время выполнения: {} ms", endTime - startTime);
 
-            if (useAtomic) {
-                return String.format("Atomic решение: результат=%d (ожидалось=%d, потеряно=%d, время=%d ms)",
+            if (useSynchronized) {
+                return String.format("Synchronized решение: результат=%d (ожидалось=%d, потеряно=%d, время=%d ms)",
                         result, expectedTotal, lost, endTime - startTime);
             } else {
                 return String.format("Race condition проблема: результат=%d (ожидалось=%d, потеряно=%d, время=%d ms)",
