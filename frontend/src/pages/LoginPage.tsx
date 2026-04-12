@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { Phone, Lock, User, Mail, LogIn, UserPlus, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Фоновое изображение
 const backgroundImage = 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1920&h=1080&fit=crop';
 
 const LoginPage: React.FC = () => {
@@ -23,7 +22,6 @@ const LoginPage: React.FC = () => {
 
     useEffect(() => {
         if (!isLoading && isAuthenticated && user) {
-            // Перенаправляем на правильные маршруты
             if (user.role === 'admin') {
                 navigate('/admin/dashboard');
             } else {
@@ -32,16 +30,12 @@ const LoginPage: React.FC = () => {
         }
     }, [isAuthenticated, user, isLoading, navigate]);
 
-    // Очистка номера телефона от лишних символов
     const cleanPhoneNumber = (value: string) => {
-        // Using replaceAll with global regex for better semantics
-        // Requires ES2021 in tsconfig.json
         return value.replaceAll(/\D/g, '');
     };
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const cleaned = cleanPhoneNumber(e.target.value);
-        // Ограничиваем длину 12 символами (375 + 9 цифр)
         const limited = cleaned.slice(0, 12);
         setFormData({ ...formData, phone: limited });
     };
@@ -52,7 +46,6 @@ const LoginPage: React.FC = () => {
 
         try {
             if (isLogin) {
-                // Вход по номеру телефона
                 const clients = await clientService.getAll();
                 const client = clients.find(c => cleanPhoneNumber(c.phone) === formData.phone);
 
@@ -68,7 +61,6 @@ const LoginPage: React.FC = () => {
                     toast.success(`Добро пожаловать, ${userData.name}!`);
                     navigate('/user/dashboard');
                 }
-                // Администратор с номером 375441234567
                 else if (formData.phone === '375441234567' && formData.password === 'admin') {
                     const adminUser = {
                         id: 0,
@@ -85,14 +77,12 @@ const LoginPage: React.FC = () => {
                     toast.error('Неверный номер телефона или пароль');
                 }
             } else {
-                // Регистрация
                 if (!formData.name || !formData.email || !formData.phone || !formData.password) {
                     toast.error('Заполните все поля');
                     setLoading(false);
                     return;
                 }
 
-                // Проверка, существует ли пользователь с таким номером
                 const existingClients = await clientService.getAll();
                 if (existingClients.some(c => cleanPhoneNumber(c.phone) === formData.phone)) {
                     toast.error('Пользователь с таким номером телефона уже существует');
@@ -230,7 +220,7 @@ const LoginPage: React.FC = () => {
                             </>
                         )}
 
-                        {/* Поле для номера телефона - без скобок и тире */}
+                        {}
                         <div className="relative">
                             <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
                             <input

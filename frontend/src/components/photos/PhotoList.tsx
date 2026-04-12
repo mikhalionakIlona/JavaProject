@@ -16,7 +16,6 @@ import {
     Upload
 } from 'lucide-react';
 
-// ВАШИ РЕАЛЬНЫЕ ФОТОГРАФИИ ИЗ ПАПКИ ASSETS
 import svadba1 from '../../assets/svadba1.png';
 import svadba2 from '../../assets/svadba2.png';
 import svadba3 from '../../assets/svadba3.png';
@@ -35,7 +34,6 @@ import family1 from '../../assets/family1.png';
 import family2 from '../../assets/family2.png';
 import family3 from '../../assets/family3.png';
 
-// МАППИНГ: для каждого типа услуги - массив уникальных фотографий
 const PHOTOS_BY_SERVICE: Record<string, string[]> = {
     'WEDDING': [svadba1, svadba2, svadba3, svadba4],
     'PORTRAIT': [port, port2, port3],
@@ -44,7 +42,6 @@ const PHOTOS_BY_SERVICE: Record<string, string[]> = {
     'FAMILY': [family1, family2, family3],
 };
 
-// Функция для получения фотографии для типа услуги
 const getPhotoForService = (serviceType: string, index: number): string => {
     const photos = PHOTOS_BY_SERVICE[serviceType];
     if (!photos || photos.length === 0) {
@@ -53,7 +50,6 @@ const getPhotoForService = (serviceType: string, index: number): string => {
     return photos[index % photos.length];
 };
 
-// Русские названия для услуг
 const getRussianServiceName = (englishName: string): string => {
     if (!englishName) return 'Не указана';
     const names: Record<string, string> = {
@@ -182,17 +178,13 @@ const PhotoList: React.FC = () => {
         }
     };
 
-    // СОЗДАЕМ ФОТОГРАФИИ ДЛЯ ОТОБРАЖЕНИЯ ИЗ СЕССИЙ
-    // Если в БД нет фото, показываем ваши PNG из assets
     const getDisplayPhotos = (): Photo[] => {
         if (!sessions || sessions.length === 0) return [];
 
-        // Если в БД есть фото, используем их
         if (photos && photos.length > 0) {
             return photos;
         }
 
-        // Иначе создаем временные фото из ваших PNG
         return sessions.map((session, idx) => {
             const serviceType = session.serviceName || 'WEDDING';
             const photoPath = getPhotoForService(serviceType, idx);
@@ -213,7 +205,7 @@ const PhotoList: React.FC = () => {
     return (
         <div className="min-h-screen pt-20 px-4">
             <div className="container mx-auto">
-                {/* Header */}
+                {}
                 <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
@@ -230,7 +222,7 @@ const PhotoList: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Photos Grid */}
+                {}
                 {displayPhotos.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {displayPhotos.map((photo, idx) => {
@@ -248,7 +240,7 @@ const PhotoList: React.FC = () => {
                                         setIsViewModalOpen(true);
                                     }}
                                 >
-                                    {/* Фото */}
+                                    {}
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-900/50 to-pink-900/50">
                                         <img
                                             src={photo.filePath}
@@ -260,7 +252,7 @@ const PhotoList: React.FC = () => {
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-                                        {/* Кнопки действий */}
+                                        {}
                                         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={(e) => {
@@ -283,7 +275,7 @@ const PhotoList: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Информация */}
+                                    {}
                                     <div className="p-4">
                                         <p className="font-semibold text-white text-sm truncate" title={photo.fileName}>
                                             {photo.fileName}
@@ -333,7 +325,7 @@ const PhotoList: React.FC = () => {
                     </div>
                 )}
 
-                {/* Upload Modal */}
+                {}
                 <Modal
                     isOpen={isUploadModalOpen}
                     onClose={() => {
@@ -434,7 +426,7 @@ const PhotoList: React.FC = () => {
                     </form>
                 </Modal>
 
-                {/* View Photo Modal */}
+                {}
                 <Modal
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
@@ -490,7 +482,7 @@ const PhotoList: React.FC = () => {
                     )}
                 </Modal>
 
-                {/* Delete Confirmation Modal */}
+                {}
                 <Modal
                     isOpen={isDeleteModalOpen}
                     onClose={() => {

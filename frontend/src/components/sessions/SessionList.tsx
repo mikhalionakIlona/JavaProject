@@ -24,7 +24,6 @@ import {
     Heart
 } from 'lucide-react';
 
-// Цены на услуги в BYN
 const ServiceTypePricesBYN: Record<string, number> = {
     'WEDDING': 300,
     'PORTRAIT': 100,
@@ -33,7 +32,6 @@ const ServiceTypePricesBYN: Record<string, number> = {
     'FAMILY': 150,
 };
 
-// Русские названия для услуг
 const getRussianServiceName = (englishName: string): string => {
     if (!englishName) return 'Не указана';
     const names: Record<string, string> = {
@@ -46,7 +44,6 @@ const getRussianServiceName = (englishName: string): string => {
     return names[englishName] || englishName;
 };
 
-// Функция для расчета стоимости фотосессии
 const calculateTotalPrice = (servicePrice: number, hourlyRate: number, hours: number = 2): number => {
     return servicePrice + (hourlyRate * hours);
 };
@@ -199,7 +196,6 @@ const SessionList: React.FC = () => {
         return 0;
     };
 
-    // Расчет правильной цены для сессии
     const getSessionPrice = (session: PhotoSession) => {
         const servicePrice = getServicePrice(session.serviceId);
         const photographerRate = getPhotographerRate(session.photographerId);
@@ -223,7 +219,6 @@ const SessionList: React.FC = () => {
         }
     };
 
-    // Фильтрация сессий
     const filteredSessions = sessions?.filter(session => {
         const matchesSearch =
             getClientName(session.clientId).toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -249,7 +244,7 @@ const SessionList: React.FC = () => {
     return (
         <div className="min-h-screen pt-20 px-4">
             <div className="container mx-auto">
-                {/* Header */}
+                {}
                 <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
@@ -266,7 +261,7 @@ const SessionList: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Фильтры */}
+                {}
                 <div className="glass-card p-6 mb-6">
                     <div className="flex items-center gap-2 mb-4">
                         <Filter className="w-5 h-5 text-purple-400" />
@@ -320,7 +315,7 @@ const SessionList: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Sessions Grid */}
+                {}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {filteredSessions?.map((session) => {
                         const status = getStatusBadge(session.date);
@@ -415,7 +410,7 @@ const SessionList: React.FC = () => {
                     </div>
                 )}
 
-                {/* Create Session Modal */}
+                {}
                 <AnimatePresence>
                     {isCreateModalOpen && (
                         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -540,7 +535,7 @@ const SessionList: React.FC = () => {
                     )}
                 </AnimatePresence>
 
-                {/* Edit Session Modal */}
+                {}
                 <AnimatePresence>
                     {isEditModalOpen && selectedSession && (
                         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">

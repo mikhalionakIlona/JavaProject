@@ -28,7 +28,6 @@ const Navbar: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Админ навигация
     const adminNavItems = [
         { path: '/admin/dashboard', label: 'Главная', icon: LayoutDashboard },
         { path: '/admin/clients', label: 'Клиенты', icon: Users },
@@ -38,7 +37,6 @@ const Navbar: React.FC = () => {
         { path: '/admin/photos', label: 'Фотографии', icon: Image },
     ];
 
-    // Пользователь навигация - ТЕПЕРЬ ТРИ ВКЛАДКИ КАК У АДМИНА
     const userNavItems = [
         { path: '/user/dashboard', label: 'Главная', icon: LayoutDashboard },
         { path: '/user/photographers', label: 'Фотографы', icon: Camera },
@@ -84,7 +82,7 @@ const Navbar: React.FC = () => {
                             </div>
                         </Link>
 
-                        {/* Десктопное меню */}
+                        {}
                         <div className="hidden md:flex items-center space-x-1">
                             {navItems.map((item, idx) => {
                                 const Icon = item.icon;
@@ -129,7 +127,7 @@ const Navbar: React.FC = () => {
                 </div>
             </nav>
 
-            {/* Мобильное меню */}
+            {}
             {isMobileMenuOpen && (
                 <div className="fixed top-16 left-0 right-0 z-40 bg-black/95 backdrop-blur-xl border-b border-purple-500/20 md:hidden animate-fade-right">
                     <div className="container mx-auto px-4 py-4 space-y-2">

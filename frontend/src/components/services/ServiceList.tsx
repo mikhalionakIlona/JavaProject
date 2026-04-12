@@ -7,32 +7,22 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { Modal } from '../common/Modal';
 import { DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// ИМПОРТ ЛОКАЛЬНЫХ PNG ИЗОБРАЖЕНИЙ
-// Свадебные фото
 import weddingImg1 from '../../assets/svadba1.png';
 import weddingImg2 from '../../assets/svadba2.png';
 import weddingImg3 from '../../assets/svadba3.png';
 import weddingImg4 from '../../assets/svadba4.png';
-
-// Портретные фото
 import portraitImg1 from '../../assets/port.png';
 import portraitImg2 from '../../assets/port2.png';
 import portraitImg3 from '../../assets/port3.png';
-
-// Предметные фото
 import productImg1 from '../../assets/predmet1.png';
 import productImg2 from '../../assets/predmet2.png';
-
-// Корпоративные фото
 import corporateImg1 from '../../assets/korparat1.png';
 import corporateImg2 from '../../assets/korparat2.png';
-
-// Семейные фото
 import familyImg1 from '../../assets/family1.png';
 import familyImg2 from '../../assets/family2.png';
 import familyImg3 from '../../assets/family3.png';
 
-// Цены на услуги в BYN
+
 const ServiceTypePricesBYN: Record<ServiceType, number> = {
     [ServiceType.WEDDING]: 300,
     [ServiceType.PORTRAIT]: 100,
@@ -41,7 +31,6 @@ const ServiceTypePricesBYN: Record<ServiceType, number> = {
     [ServiceType.FAMILY]: 150,
 };
 
-// ГАЛЕРЕИ ФОТОГРАФИЙ ДЛЯ КАЖДОЙ УСЛУГИ (с локальными PNG)
 const serviceGalleries: Record<ServiceType, { url: string; title: string }[]> = {
     [ServiceType.WEDDING]: [
         { url: weddingImg1, title: 'Свадебная фотосессия 1' },
@@ -69,7 +58,6 @@ const serviceGalleries: Record<ServiceType, { url: string; title: string }[]> = 
     ],
 };
 
-// Основное фото для превью (первое из галереи)
 const getServicePreviewImage = (serviceType: ServiceType): string => {
     return serviceGalleries[serviceType]?.[0]?.url || '';
 };
@@ -134,7 +122,6 @@ const ServiceList: React.FC = () => {
         }
     }, [selectedService, currentImageIndex]);
 
-    // Keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!isModalOpen) return;
@@ -158,7 +145,7 @@ const ServiceList: React.FC = () => {
     return (
         <div className="min-h-screen pt-20 px-4">
             <div className="container mx-auto">
-                {/* Header */}
+                {}
                 <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
@@ -168,7 +155,7 @@ const ServiceList: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Services Grid */}
+                {}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {services?.map((service) => {
                         const servicePrice = ServiceTypePricesBYN[service.serviceType];
@@ -195,7 +182,7 @@ const ServiceList: React.FC = () => {
                                 tabIndex={0}
                                 aria-label={`Открыть галерею ${service.name}`}
                             >
-                                {/* Фото услуги */}
+                                {}
                                 <div className="relative h-48 overflow-hidden bg-gray-800">
                                     <img
                                         src={previewImage}
@@ -213,7 +200,7 @@ const ServiceList: React.FC = () => {
                                             </h3>
                                         </div>
                                     </div>
-                                    {/* Индикатор количества фото */}
+                                    {}
                                     {galleryCount > 0 && (
                                         <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-white">
                                             📷 {galleryCount} фото
@@ -230,7 +217,7 @@ const ServiceList: React.FC = () => {
                                         <span className="text-xl font-bold text-green-400">{servicePrice} BYN</span>
                                     </div>
 
-                                    {/* Декоративная линия внизу */}
+                                    {}
                                     <div className="mt-4 pt-3 border-t border-white/10">
                                         <div className="flex items-center justify-between text-xs text-white/30">
                                             <span>Доступно для заказа</span>
@@ -251,7 +238,7 @@ const ServiceList: React.FC = () => {
                     </div>
                 )}
 
-                {/* Модальное окно для просмотра галереи */}
+                {}
                 <Modal
                     isOpen={isModalOpen}
                     onClose={closeGallery}
@@ -260,7 +247,7 @@ const ServiceList: React.FC = () => {
                 >
                     {selectedService && currentGallery.length > 0 && (
                         <div className="space-y-4" ref={modalRef}>
-                            {/* Основное изображение */}
+                            {}
                             <div className="relative">
                                 <img
                                     src={currentGallery[currentImageIndex].url}
@@ -271,7 +258,7 @@ const ServiceList: React.FC = () => {
                                     {currentGallery[currentImageIndex].title}
                                 </p>
 
-                                {/* Кнопки навигации */}
+                                {}
                                 {currentGallery.length > 1 && (
                                     <>
                                         <button
@@ -294,7 +281,7 @@ const ServiceList: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Миниатюры */}
+                            {}
                             {currentGallery.length > 1 && (
                                 <div className="grid grid-cols-4 gap-2 mt-4">
                                     {currentGallery.map((img, idx) => (
@@ -316,7 +303,7 @@ const ServiceList: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Информация о стоимости */}
+                            {}
                             <div className="bg-gray-50 rounded-lg p-4 mt-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Стоимость услуги:</span>

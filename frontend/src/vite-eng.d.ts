@@ -1,6 +1,4 @@
-/// <reference types="vite/client" />
 
-// Добавляем поддержку импорта изображений
 declare module '*.png' {
     const value: string;
     export default value;

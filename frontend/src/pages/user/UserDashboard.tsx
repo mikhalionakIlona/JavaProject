@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Цены на услуги в BYN
 const ServiceTypePricesBYN: Record<string, number> = {
     'WEDDING': 300,
     'PORTRAIT': 100,
@@ -27,7 +26,6 @@ const ServiceTypePricesBYN: Record<string, number> = {
     'FAMILY': 150,
 };
 
-// Статистическая карточка для пользователя
 const UserStatCard: React.FC<{ label: string; value: string | number; icon: React.ElementType; delay: number; description?: string }> =
     ({ label, value, icon: Icon, delay, description }) => {
         return (
@@ -298,7 +296,7 @@ const UserDashboard: React.FC = () => {
     return (
         <div className="min-h-screen pt-20 px-4">
             <div className="container mx-auto">
-                {/* Hero секция */}
+                {}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -318,7 +316,7 @@ const UserDashboard: React.FC = () => {
                     <p className="text-white/50 mt-2">Управление фотосессиями</p>
                 </motion.div>
 
-                {/* Приветственная секция */}
+                {}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -346,14 +344,14 @@ const UserDashboard: React.FC = () => {
                     </div>
                 </motion.div>
 
-                {/* Статистика */}
+                {}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {stats.map((stat) => (
                         <UserStatCard key={stat.label} {...stat} />
                     ))}
                 </div>
 
-                {/* Список фотосессий */}
+                {}
                 <div className="glass-card p-6">
                     <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-rose-400" />
@@ -362,7 +360,7 @@ const UserDashboard: React.FC = () => {
                     {renderSessionsContent()}
                 </div>
 
-                {/* Модальное окно бронирования */}
+                {}
                 <AnimatePresence>
                     {isModalOpen && (
                         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">

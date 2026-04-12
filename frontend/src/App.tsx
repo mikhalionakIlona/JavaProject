@@ -27,7 +27,6 @@ const queryClient = new QueryClient({
     },
 });
 
-// Компонент с плавающими частицами
 const FloatingParticles: React.FC = () => {
     useEffect(() => {
         const createParticle = () => {
@@ -113,11 +112,11 @@ function App() {
                 />
                 <AppLayout>
                     <Routes>
-                        {/* Публичные маршруты */}
+                        {}
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/" element={<Navigate to="/login" replace />} />
 
-                        {/* Пользовательские маршруты */}
+                        {}
                         <Route path="/user/dashboard" element={
                             <ProtectedRoute allowedRoles={['user']}>
                                 <UserDashboard />
@@ -134,7 +133,7 @@ function App() {
                             </ProtectedRoute>
                         } />
 
-                        {/* Админ маршруты */}
+                        {}
                         <Route path="/admin/dashboard" element={
                             <ProtectedRoute allowedRoles={['admin']}>
                                 <AdminDashboard />
@@ -166,7 +165,7 @@ function App() {
                             </ProtectedRoute>
                         } />
 
-                        {/* Fallback */}
+                        {}
                         <Route path="/user" element={<Navigate to="/user/dashboard" replace />} />
                         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                         <Route path="*" element={<Navigate to="/login" replace />} />

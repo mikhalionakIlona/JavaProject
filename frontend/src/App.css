@@ -1,23 +1,17 @@
 :root {
-  /* Основные цвета */
   --accent: #646cff;
   --accent-bg: rgba(100, 108, 255, 0.1);
   --accent-border: #646cff;
 
-  /* Границы */
   --border: #e2e8f0;
 
-  /* Текст */
   --text-h: #1a202c;
 
-  /* Фон для социальных кнопок */
   --social-bg: #f1f5f9;
 
-  /* Тени */
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Темная тема (опционально) */
 @media (prefers-color-scheme: dark) {
   :root {
     --accent: #818cf8;

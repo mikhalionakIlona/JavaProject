@@ -41,7 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
     return (
         <>
-            {/* Overlay */}
+            {}
             {isOpen && (
                 <button
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden cursor-pointer"
@@ -52,12 +52,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 />
             )}
 
-            {/* Sidebar */}
+            {}
             <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
                 isOpen ? 'translate-x-0' : '-translate-x-full'
             } md:translate-x-0`}>
                 <div className="flex flex-col h-full">
-                    {/* Header */}
+                    {}
                     <div className="p-4 border-b border-gray-100 flex justify-between items-center">
                         <div className="flex items-center space-x-2">
                             <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         </button>
                     </div>
 
-                    {/* Navigation */}
+                    {}
                     <nav className="flex-1 p-4 space-y-1">
                         {navItems.map((item) => {
                             const active = isActive(item.path);
@@ -93,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         })}
                     </nav>
 
-                    {/* Footer */}
+                    {}
                     <div className="p-4 border-t border-gray-100">
                         <div className="text-xs text-gray-400 text-center">
                             PhotoStudio v1.0

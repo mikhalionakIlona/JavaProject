@@ -23,7 +23,6 @@ import {
     User
 } from 'lucide-react';
 
-// Русские названия для услуг
 const getRussianServiceName = (englishName: string): string => {
     if (!englishName) return 'Не указана';
     const names: Record<string, string> = {
@@ -184,7 +183,7 @@ const ClientList: React.FC = () => {
     return (
         <div className="min-h-screen pt-20 px-4">
             <div className="container mx-auto">
-                {/* Header */}
+                {}
                 <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
@@ -201,7 +200,7 @@ const ClientList: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Поиск */}
+                {}
                 <div className="mb-6">
                     <div className="relative group">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400 group-focus-within:text-rose-400 transition-colors" />
@@ -215,7 +214,7 @@ const ClientList: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Clients Grid */}
+                {}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredClients?.map((client) => (
                         <motion.div
@@ -288,7 +287,7 @@ const ClientList: React.FC = () => {
                     </div>
                 )}
 
-                {/* Create/Edit Modal */}
+                {}
                 <Modal isOpen={isModalOpen} onClose={closeModal} title={editingId ? 'Редактирование клиента' : 'Добавление клиента'}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -348,7 +347,7 @@ const ClientList: React.FC = () => {
                     </form>
                 </Modal>
 
-                {/* View Sessions Modal */}
+                {}
                 <Modal
                     isOpen={isViewModalOpen}
                     onClose={() => {
@@ -361,7 +360,7 @@ const ClientList: React.FC = () => {
                     size="lg"
                 >
                     <div className="space-y-4">
-                        {/* Фильтры */}
+                        {}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-4 border-b border-rose-500/30">
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-rose-400" />
@@ -387,7 +386,7 @@ const ClientList: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Кнопка сброса фильтров */}
+                        {}
                         {(filterDate || filterService) && (
                             <div className="flex justify-end">
                                 <button
@@ -403,14 +402,14 @@ const ClientList: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Состояние загрузки */}
+                        {}
                         {isLoadingSessions && (
                             <div className="flex justify-center py-8">
                                 <div className="w-8 h-8 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin"></div>
                             </div>
                         )}
 
-                        {/* Список сессий */}
+                        {}
                         {!isLoadingSessions && filteredSessions.length === 0 && (
                             <div className="text-center py-8 text-white/40">
                                 <Camera className="w-12 h-12 mx-auto mb-2 opacity-50 text-rose-400" />
@@ -460,7 +459,7 @@ const ClientList: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Итоговая информация */}
+                        {}
                         {!isLoadingSessions && filteredSessions.length > 0 && (
                             <div className="pt-3 border-t border-rose-500/30">
                                 <p className="text-sm text-gray-400">

@@ -20,7 +20,6 @@ import {
 
 const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 
-// Компонент круговой диаграммы
 const PieChart: React.FC<{ data: { name: string; value: number; color: string }[]; title: string; icon?: React.ReactNode }> =
     ({ data, title, icon }) => {
         const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -115,7 +114,6 @@ const PieChart: React.FC<{ data: { name: string; value: number; color: string }[
         );
     };
 
-// Анимированная статистическая карточка
 const StatCard: React.FC<{ label: string; value: string | number; icon: React.ElementType; delay: number; trend?: string }> =
     ({ label, value, icon: Icon, delay, trend }) => {
         return (
@@ -152,7 +150,6 @@ const AdminDashboard: React.FC = () => {
     const { data: services } = useQuery({ queryKey: ['services'], queryFn: serviceService.getAll });
     const { data: photos } = useQuery({ queryKey: ['photos'], queryFn: photoService.getAll });
 
-    // Прямое использование цен без конвертации
     const totalRevenue = sessions?.reduce((sum, s) => sum + s.totalPrice, 0) || 0;
 
     const stats = [
@@ -164,7 +161,6 @@ const AdminDashboard: React.FC = () => {
         { label: 'Выручка', value: `${totalRevenue.toLocaleString()} BYN`, icon: TrendingUp, delay: 0.6, trend: '+23%' },
     ];
 
-    // Подготовка данных для круговой диаграммы по услугам
     const serviceColors = ['#8b5cf6', '#ec4899', '#06b6d4', '#f59e0b', '#10b981'];
     const serviceDistribution = services?.map((service, idx) => ({
         name: service.name.length > 15 ? service.name.substring(0, 12) + '...' : service.name,
@@ -172,7 +168,6 @@ const AdminDashboard: React.FC = () => {
         color: serviceColors[idx % serviceColors.length],
     })).filter(s => s.value > 0) || [];
 
-    // Подготовка данных для круговой диаграммы по месяцам
     const sessionsByMonth: { [key: string]: number } = {};
     sessions?.forEach(session => {
         const date = new Date(session.date);
@@ -200,18 +195,15 @@ const AdminDashboard: React.FC = () => {
             return monthOrder.indexOf(bMonth) - monthOrder.indexOf(aMonth);
         });
 
-    // Популярные услуги
     const popularServices = services?.map(service => ({
         name: service.name,
         count: sessions?.filter(s => s.serviceId === service.id).length || 0,
     })).sort((a, b) => b.count - a.count).slice(0, 3) || [];
 
-    // Предстоящие фотосессии
     const upcomingSessions = sessions?.filter(s => new Date(s.date) > new Date())
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .slice(0, 5) || [];
 
-    // Лучшие фотографы
     const topPhotographers = photographers?.map(photographer => ({
         name: `${photographer.firstName} ${photographer.lastName}`,
         sessionsCount: sessions?.filter(s => s.photographerId === photographer.id).length || 0,
@@ -220,7 +212,7 @@ const AdminDashboard: React.FC = () => {
     return (
         <div className="min-h-screen pt-20 px-4">
             <div className="container mx-auto">
-                {/* Hero секция */}
+                {}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -240,14 +232,14 @@ const AdminDashboard: React.FC = () => {
                     <p className="text-white/50 mt-2">Статистика и аналитика фотостудии</p>
                 </motion.div>
 
-                {/* Статистика */}
+                {}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {stats.map((stat) => (
                         <StatCard key={stat.label} {...stat} />
                     ))}
                 </div>
 
-                {/* Круговые диаграммы */}
+                {}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     {monthDistribution.length > 0 && (
                         <PieChart
@@ -265,9 +257,9 @@ const AdminDashboard: React.FC = () => {
                     )}
                 </div>
 
-                {/* Дополнительные блоки */}
+                { }
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Популярные услуги */}
+                    {}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -291,7 +283,7 @@ const AdminDashboard: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Предстоящие фотосессии */}
+                    {}
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -318,7 +310,7 @@ const AdminDashboard: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Лучшие фотографы */}
+                    {}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}

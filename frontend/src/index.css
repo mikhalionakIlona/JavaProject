@@ -19,7 +19,6 @@
     color: #ffffff;
   }
 
-  /* Анимированный градиентный фон - уменьшена интенсивность для лучшей контрастности */
   body::before {
     content: '';
     position: fixed;
@@ -35,27 +34,24 @@
     z-index: 0;
   }
 
-  /* Заголовки - максимальная контрастность */
   h1, h2, h3, h4, h5, h6 {
     color: #ffffff;
     font-weight: 700;
     line-height: 1.2;
   }
 
-  /* Основной текст - яркий белый для максимальной контрастности */
   p, span, li, label, div, a {
     color: #ffffff;
     line-height: 1.5;
   }
 
-  /* Мелкий текст - светло-серый, но все еще с высокой контрастностью */
   small, .text-sm, .text-xs, .text-gray {
     color: #d1d5db;
   }
 }
 
 @layer components {
-  /* Glassmorphism карточки - более темный фон */
+
   .glass-card {
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
@@ -66,12 +62,10 @@
     overflow: hidden;
   }
 
-  /* Текст внутри карточек - всегда белый */
   .glass-card * {
     color: #ffffff;
   }
 
-  /* Исключение для очень маленького текста в карточках */
   .glass-card small,
   .glass-card .text-xs,
   .glass-card .text-sm {
@@ -99,7 +93,6 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.3);
   }
 
-  /* Кнопки */
   .btn-primary {
     background: linear-gradient(135deg, #8b5cf6 0, #ec4899 100%);
     color: #ffffff;
@@ -142,14 +135,12 @@
     box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
   }
 
-  /* Неоновый текст */
   .neon-text {
     text-shadow: 0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3);
     color: #ffffff;
     font-weight: 600;
   }
 
-  /* Градиентный текст - яркие цвета */
   .gradient-text {
     background: linear-gradient(135deg, #c084fc 0, #f472b6 50%, #22d3ee 100%);
     -webkit-background-clip: text;
@@ -165,7 +156,6 @@
     50% { background-position: 100% 50%; }
   }
 
-  /* Бейджи - улучшенная контрастность */
   .badge {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
@@ -203,7 +193,6 @@
     border: 1px solid rgba(245, 158, 11, 0.6);
   }
 
-  /* Инпуты - улучшенная контрастность */
   .input-field {
     background: rgba(31, 41, 55, 0.95);
     border: 1px solid rgba(139, 92, 246, 0.3);
@@ -223,7 +212,6 @@
     color: #d1d5db;
   }
 
-  /* Плавающие частицы */
   .floating-particle {
     position: fixed;
     pointer-events: none;
@@ -231,7 +219,6 @@
   }
 }
 
-/* Анимации */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -312,14 +299,12 @@
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
-/* Задержки анимации */
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
 .delay-400 { animation-delay: 0.4s; }
 .delay-500 { animation-delay: 0.5s; }
 
-/* Стилизация скроллбара */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
