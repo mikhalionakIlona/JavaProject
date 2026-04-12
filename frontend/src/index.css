@@ -1,0 +1,340 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    background: #000000;
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #ffffff;
+  }
+
+  /* Анимированный градиентный фон - уменьшена интенсивность для лучшей контрастности */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+            radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.08) 0, transparent 50%),
+            radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.05) 0, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Заголовки - максимальная контрастность */
+  h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  /* Основной текст - яркий белый для максимальной контрастности */
+  p, span, li, label, div, a {
+    color: #ffffff;
+    line-height: 1.5;
+  }
+
+  /* Мелкий текст - светло-серый, но все еще с высокой контрастностью */
+  small, .text-sm, .text-xs, .text-gray {
+    color: #d1d5db;
+  }
+}
+
+@layer components {
+  /* Glassmorphism карточки - более темный фон */
+  .glass-card {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Текст внутри карточек - всегда белый */
+  .glass-card * {
+    color: #ffffff;
+  }
+
+  /* Исключение для очень маленького текста в карточках */
+  .glass-card small,
+  .glass-card .text-xs,
+  .glass-card .text-sm {
+    color: #d1d5db;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .glass-card:hover::before {
+    left: 100%;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.3);
+  }
+
+  /* Кнопки */
+  .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0, #ec4899 100%);
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn-primary:hover:not(:disabled)::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+  }
+
+  /* Неоновый текст */
+  .neon-text {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3);
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* Градиентный текст - яркие цвета */
+  .gradient-text {
+    background: linear-gradient(135deg, #c084fc 0, #f472b6 50%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% auto;
+    animation: gradientShift 3s ease infinite;
+    font-weight: 700;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Бейджи - улучшенная контрастность */
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .badge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .badge-active {
+    background: rgba(16, 185, 129, 0.4);
+    color: #a7f3d0;
+    border: 1px solid rgba(16, 185, 129, 0.6);
+  }
+
+  .badge-pending {
+    background: rgba(245, 158, 11, 0.4);
+    color: #fde68a;
+    border: 1px solid rgba(245, 158, 11, 0.6);
+  }
+
+  /* Инпуты - улучшенная контрастность */
+  .input-field {
+    background: rgba(31, 41, 55, 0.95);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  }
+
+  .input-field::placeholder {
+    color: #d1d5db;
+  }
+
+  /* Плавающие частицы */
+  .floating-particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-left {
+  animation: fadeInLeft 0.6s ease-out forwards;
+}
+
+.animate-fade-right {
+  animation: fadeInRight 0.6s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-rotate {
+  animation: rotate 20s linear infinite;
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Задержки анимации */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* Стилизация скроллбара */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.8);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #a78bfa, #f472b6);
+}
