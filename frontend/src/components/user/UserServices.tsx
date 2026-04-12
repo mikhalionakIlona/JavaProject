@@ -6,8 +6,6 @@ import { ServiceType, PhotoService } from '../../types';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { Modal } from '../common/Modal';
 import { DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
-
-// ИМПОРТ ЛОКАЛЬНЫХ PNG ИЗОБРАЖЕНИЙ
 import weddingImg1 from '../../assets/svadba1.png';
 import weddingImg2 from '../../assets/svadba2.png';
 import weddingImg3 from '../../assets/svadba3.png';
@@ -23,7 +21,6 @@ import familyImg1 from '../../assets/family1.png';
 import familyImg2 from '../../assets/family2.png';
 import familyImg3 from '../../assets/family3.png';
 
-// Цены на услуги в BYN
 const ServiceTypePricesBYN: Record<ServiceType, number> = {
     [ServiceType.WEDDING]: 300,
     [ServiceType.PORTRAIT]: 100,
@@ -32,7 +29,6 @@ const ServiceTypePricesBYN: Record<ServiceType, number> = {
     [ServiceType.FAMILY]: 150,
 };
 
-// ГАЛЕРЕИ ФОТОГРАФИЙ ДЛЯ КАЖДОЙ УСЛУГИ
 const serviceGalleries: Record<ServiceType, { url: string; title: string }[]> = {
     [ServiceType.WEDDING]: [
         { url: weddingImg1, title: 'Свадебная фотосессия 1' },
@@ -123,7 +119,6 @@ const UserServices: React.FC = () => {
         }
     }, [selectedService, currentImageIndex]);
 
-    // Keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!isModalOpen) return;
@@ -225,7 +220,7 @@ const UserServices: React.FC = () => {
                 })}
             </div>
 
-            {/* Модальное окно для просмотра галереи */}
+            {}
             <Modal
                 isOpen={isModalOpen}
                 onClose={closeGallery}
