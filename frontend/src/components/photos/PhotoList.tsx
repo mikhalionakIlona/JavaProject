@@ -42,10 +42,8 @@ const PHOTOS_BY_SERVICE: Record<string, string[]> = {
     'FAMILY': [family1, family2, family3],
 };
 
-// Ключ для localStorage
 const STORAGE_KEY = 'session_photo_index';
 
-// Функция для получения сохранённых индексов
 const getStoredIndexes = (): Record<number, number> => {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -58,7 +56,6 @@ const getStoredIndexes = (): Record<number, number> => {
     return {};
 };
 
-// Функция для сохранения индексов
 const saveStoredIndexes = (indexes: Record<number, number>) => {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(indexes));
@@ -67,7 +64,6 @@ const saveStoredIndexes = (indexes: Record<number, number>) => {
     }
 };
 
-// Получение фото для сессии с сохранением уникальности
 const getUniquePhotoForSession = (serviceType: string, sessionId: number): string => {
     const photos = PHOTOS_BY_SERVICE[serviceType];
     if (!photos || photos.length === 0) {
@@ -77,10 +73,8 @@ const getUniquePhotoForSession = (serviceType: string, sessionId: number): strin
     const storedIndexes = getStoredIndexes();
     let currentIndex = storedIndexes[sessionId] || 0;
 
-    // Получаем фото по текущему индексу
     const photo = photos[currentIndex % photos.length];
 
-    // Увеличиваем индекс для следующего раза
     currentIndex++;
     storedIndexes[sessionId] = currentIndex;
     saveStoredIndexes(storedIndexes);
@@ -88,7 +82,6 @@ const getUniquePhotoForSession = (serviceType: string, sessionId: number): strin
     return photo;
 };
 
-// Сброс индексов для конкретной сессии
 const resetSessionPhotoIndex = (sessionId: number) => {
     const storedIndexes = getStoredIndexes();
     delete storedIndexes[sessionId];
@@ -225,14 +218,11 @@ const PhotoList: React.FC = () => {
         }
     };
 
-    // Генерируем демо-фото на основе сессий с уникальными фото для каждой сессии
     const getDemoPhotos = (): Photo[] => {
         if (!sessions || sessions.length === 0) return [];
 
-        // Счетчик для разных фото внутри одной сессии
         const photoCountPerSession: Record<number, number> = {};
 
-        // Для каждой сессии генерируем от 1 до 3 разных фото
         const demoPhotos: Photo[] = [];
 
         sessions.forEach((session) => {
@@ -241,20 +231,17 @@ const PhotoList: React.FC = () => {
 
             if (!photosList || photosList.length === 0) return;
 
-            // Определяем количество фото для этой сессии (от 1 до количества доступных фото)
             const photosCount = Math.min(photosList.length, Math.floor(Math.random() * 3) + 1);
 
-            // Создаем уникальные фото для сессии
             for (let i = 0; i < photosCount; i++) {
-                // Используем комбинацию ID сессии и индекса для выбора уникального фото
                 const photoIndex = (session.id * 7 + i * 3) % photosList.length;
                 const photoPath = photosList[photoIndex];
 
                 demoPhotos.push({
-                    id: session.id * 100 + i, // Уникальный ID
+                    id: session.id * 100 + i,
                     fileName: `${getRussianServiceName(serviceType)}_${i + 1}.png`,
                     filePath: photoPath,
-                    uploadDate: new Date(Date.now() - i * 86400000).toISOString(), // Разные даты
+                    uploadDate: new Date(Date.now() - i * 86400000).toISOString(),
                     sessionId: session.id,
                 } as Photo);
             }
@@ -263,7 +250,6 @@ const PhotoList: React.FC = () => {
         return demoPhotos;
     };
 
-    // Используем реальные фото если есть, иначе демо
     const displayPhotos = (photos && photos.length > 0) ? photos : getDemoPhotos();
 
     if (isLoading) return <LoadingSpinner />;
