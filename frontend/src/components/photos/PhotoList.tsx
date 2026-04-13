@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { photoService } from '../../services/photoService';
 import { sessionService } from '../../services/sessionService';
 import { Photo, PhotoSession } from '../../types';
