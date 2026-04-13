@@ -15,6 +15,8 @@ import {
     Image as ImageIcon,
     Award,
     X,
+    AlertCircle,
+    CheckCircle,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -137,6 +139,8 @@ const UserDashboard: React.FC = () => {
         photographerId: 0,
         serviceId: 0,
     });
+    const [availabilityMessage, setAvailabilityMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+    const [isChecking, setIsChecking] = useState(false);
 
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useToast();
@@ -177,6 +181,64 @@ const UserDashboard: React.FC = () => {
         queryFn: serviceService.getAll,
     });
 
+    const checkPhotographerAvailability = (photographerId: number, dateTime: string): { available: boolean; message?: string } => {
+        if (!photographerId || !dateTime || !allSessions?.length) {
+            return { available: true };
+        }
+
+        const selectedDate = new Date(dateTime);
+        const selectedEndTime = new Date(selectedDate.getTime() + 2 * 60 * 60 * 1000);
+
+        const conflictingSession = allSessions.find(session => {
+            if (session.photographerId !== photographerId) return false;
+
+            const sessionDate = new Date(session.date);
+            const sessionEndTime = new Date(sessionDate.getTime() + 2 * 60 * 60 * 1000);
+
+            return (selectedDate < sessionEndTime && selectedEndTime > sessionDate);
+        });
+
+        if (conflictingSession) {
+            const photographer = photographers?.find(p => p.id === photographerId);
+            const photographerName = photographer ? `${photographer.firstName} ${photographer.lastName}` : 'Фотограф';
+
+            const conflictDate = new Date(conflictingSession.date).toLocaleString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            return {
+                available: false,
+                message: `❌ ${photographerName} уже занят ${conflictDate}. Сессия длится 2 часа. Пожалуйста, выберите другое время.`
+            };
+        }
+
+        return { available: true };
+    };
+
+    useEffect(() => {
+        if (formData.photographerId && formData.date) {
+            setIsChecking(true);
+            setAvailabilityMessage(null);
+
+            const timer = setTimeout(() => {
+                const result = checkPhotographerAvailability(formData.photographerId, formData.date);
+                if (!result.available) {
+                    setAvailabilityMessage({ type: 'error', text: result.message! });
+                } else {
+                    setAvailabilityMessage({ type: 'success', text: '✓ Фотограф свободен в выбранное время' });
+                }
+                setIsChecking(false);
+            }, 500);
+
+            return () => clearTimeout(timer);
+        } else {
+            setAvailabilityMessage(null);
+        }
+    }, [formData.photographerId, formData.date, allSessions]);
+
     const createSessionMutation = useMutation({
         mutationFn: sessionService.create,
         onSuccess: async () => {
@@ -185,9 +247,16 @@ const UserDashboard: React.FC = () => {
             showSuccess('Фотосессия успешно забронирована!');
             setIsModalOpen(false);
             setFormData({ date: '', photographerId: 0, serviceId: 0 });
+            setAvailabilityMessage(null);
         },
-        onError: (error: Error) => {
-            showError(error.message || 'Ошибка при создании бронирования');
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || error.message || '';
+
+            if (errorMessage.toLowerCase().includes('занят') || errorMessage.toLowerCase().includes('busy')) {
+                showError('❌ Фотограф уже занят в выбранное время. Сессия длится 2 часа. Пожалуйста, выберите другое время.');
+            } else {
+                showError(errorMessage || 'Ошибка при создании бронирования');
+            }
         },
     });
 
@@ -207,6 +276,7 @@ const UserDashboard: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!formData.date || formData.photographerId === 0 || formData.serviceId === 0) {
             showError('Заполните все поля');
             return;
@@ -215,11 +285,20 @@ const UserDashboard: React.FC = () => {
             showError('Клиент не найден');
             return;
         }
+
         const selectedDate = new Date(formData.date);
         if (selectedDate < new Date()) {
             showError('Дата должна быть в будущем');
             return;
         }
+
+        const result = checkPhotographerAvailability(formData.photographerId, formData.date);
+        if (!result.available) {
+            setAvailabilityMessage({ type: 'error', text: result.message! });
+            showError(result.message);
+            return;
+        }
+
         createSessionMutation.mutate({
             date: formData.date,
             clientId: clientId,
@@ -406,7 +485,11 @@ const UserDashboard: React.FC = () => {
                 {}
                 <Modal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setAvailabilityMessage(null);
+                        setFormData({ date: '', photographerId: 0, serviceId: 0 });
+                    }}
                     title="Забронировать фотосессию"
                     size="md"
                 >
@@ -425,6 +508,9 @@ const UserDashboard: React.FC = () => {
                                 className="form-input"
                                 min={new Date().toISOString().slice(0, 16)}
                             />
+                            <p className="text-xs text-white/40 mt-1">
+                                ⏰ Длительность сессии: 2 часа
+                            </p>
                         </div>
 
                         <div className="form-group">
@@ -469,6 +555,33 @@ const UserDashboard: React.FC = () => {
                             </select>
                         </div>
 
+                        {}
+                        {isChecking && (
+                            <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
+                                <p className="text-blue-400 text-sm">⏳ Проверка доступности фотографа...</p>
+                            </div>
+                        )}
+
+                        {}
+                        {availabilityMessage && availabilityMessage.type === 'error' && (
+                            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 flex items-start gap-2">
+                                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-red-400 text-sm font-medium">{availabilityMessage.text}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {}
+                        {availabilityMessage && availabilityMessage.type === 'success' && (
+                            <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 flex items-start gap-2">
+                                <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-green-400 text-sm font-medium">{availabilityMessage.text}</p>
+                                </div>
+                            </div>
+                        )}
+
                         {formData.photographerId > 0 && formData.serviceId > 0 && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
@@ -498,14 +611,18 @@ const UserDashboard: React.FC = () => {
                         <div className="form-actions mt-4">
                             <button
                                 type="button"
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={() => {
+                                    setIsModalOpen(false);
+                                    setAvailabilityMessage(null);
+                                    setFormData({ date: '', photographerId: 0, serviceId: 0 });
+                                }}
                                 className="btn-cancel"
                             >
                                 Отмена
                             </button>
                             <button
                                 type="submit"
-                                disabled={createSessionMutation.isPending}
+                                disabled={createSessionMutation.isPending || isChecking || (availabilityMessage?.type === 'error')}
                                 className="btn-save"
                             >
                                 {createSessionMutation.isPending ? 'Бронирование...' : 'Забронировать'}

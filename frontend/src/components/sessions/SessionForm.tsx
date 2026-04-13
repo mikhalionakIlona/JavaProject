@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PhotoSessionCreateDto, Client, Photographer, PhotoService } from '../../types';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 interface SessionFormProps {
     initialData?: PhotoSessionCreateDto;
@@ -9,6 +10,7 @@ interface SessionFormProps {
     onSubmit: (data: PhotoSessionCreateDto) => void;
     onCancel: () => void;
     isLoading: boolean;
+    existingSessions?: any[];
 }
 
 const SessionForm: React.FC<SessionFormProps> = ({
@@ -19,13 +21,16 @@ const SessionForm: React.FC<SessionFormProps> = ({
                                                      onSubmit,
                                                      onCancel,
                                                      isLoading,
+                                                     existingSessions = [],
                                                  }) => {
-    const [formData, setFormData] = React.useState<PhotoSessionCreateDto>({
+    const [formData, setFormData] = useState<PhotoSessionCreateDto>({
         date: '',
         clientId: 0,
         photographerId: 0,
         serviceId: 0,
     });
+    const [availabilityMessage, setAvailabilityMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+    const [isChecking, setIsChecking] = useState(false);
 
     useEffect(() => {
         if (initialData) {
@@ -33,9 +38,88 @@ const SessionForm: React.FC<SessionFormProps> = ({
         }
     }, [initialData]);
 
+    const checkPhotographerAvailability = (photographerId: number, dateTime: string): { available: boolean; message?: string } => {
+        if (!photographerId || !dateTime || !existingSessions.length) {
+            return { available: true };
+        }
+
+        const selectedDate = new Date(dateTime);
+        const selectedEndTime = new Date(selectedDate.getTime() + 2 * 60 * 60 * 1000);
+
+        const conflictingSession = existingSessions.find((session: any) => {
+            if (session.photographerId !== photographerId) return false;
+
+            const sessionDate = new Date(session.date);
+            const sessionEndTime = new Date(sessionDate.getTime() + 2 * 60 * 60 * 1000);
+
+            return (selectedDate < sessionEndTime && selectedEndTime > sessionDate);
+        });
+
+        if (conflictingSession) {
+            const photographer = photographers.find(p => p.id === photographerId);
+            const photographerName = photographer ? `${photographer.firstName} ${photographer.lastName}` : 'Фотограф';
+
+            const conflictDate = new Date(conflictingSession.date).toLocaleString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            return {
+                available: false,
+                message: `❌ ${photographerName} уже занят ${conflictDate}. Сессия длится 2 часа. Пожалуйста, выберите другое время.`
+            };
+        }
+
+        return { available: true };
+    };
+
+    useEffect(() => {
+        if (formData.photographerId && formData.date) {
+            setIsChecking(true);
+            setAvailabilityMessage(null);
+
+            const timer = setTimeout(() => {
+                const result = checkPhotographerAvailability(formData.photographerId, formData.date);
+                if (!result.available) {
+                    setAvailabilityMessage({ type: 'error', text: result.message! });
+                } else {
+                    setAvailabilityMessage({ type: 'success', text: '✓ Фотограф свободен в выбранное время' });
+                }
+                setIsChecking(false);
+            }, 300);
+
+            return () => clearTimeout(timer);
+        } else {
+            setAvailabilityMessage(null);
+        }
+    }, [formData.photographerId, formData.date, existingSessions]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (formData.photographerId && formData.date) {
+            const result = checkPhotographerAvailability(formData.photographerId, formData.date);
+            if (!result.available) {
+                setAvailabilityMessage({ type: 'error', text: result.message! });
+                return;
+            }
+        }
+
         onSubmit(formData);
+    };
+
+    const getMinDateTime = () => {
+        const now = new Date();
+        now.setMinutes(0);
+        now.setSeconds(0);
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(Math.ceil(now.getMinutes() / 30) * 30).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
     return (
@@ -46,10 +130,14 @@ const SessionForm: React.FC<SessionFormProps> = ({
                     id="date"
                     type="datetime-local"
                     required
+                    min={getMinDateTime()}
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="form-input"
                 />
+                <p className="text-xs text-white/40 mt-1">
+                    ⏰ Длительность сессии: 2 часа
+                </p>
             </div>
 
             <div className="form-group">
@@ -106,12 +194,40 @@ const SessionForm: React.FC<SessionFormProps> = ({
                 </select>
             </div>
 
+            {isChecking && (
+                <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
+                    <p className="text-blue-400 text-sm">⏳ Проверка доступности фотографа...</p>
+                </div>
+            )}
+
+            {availabilityMessage && availabilityMessage.type === 'error' && (
+                <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-red-400 text-sm font-medium">{availabilityMessage.text}</p>
+                    </div>
+                </div>
+            )}
+
+            {availabilityMessage && availabilityMessage.type === 'success' && (
+                <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 flex items-start gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-green-400 text-sm font-medium">{availabilityMessage.text}</p>
+                    </div>
+                </div>
+            )}
+
             <div className="form-actions">
                 <button type="button" onClick={onCancel} className="btn-cancel">
                     Отмена
                 </button>
-                <button type="submit" disabled={isLoading} className="btn-save">
-                    {isLoading ? 'Сохранение...' : 'Создать'}
+                <button
+                    type="submit"
+                    disabled={isLoading || isChecking || (availabilityMessage?.type === 'error')}
+                    className="btn-save"
+                >
+                    {isLoading ? 'Сохранение...' : 'Забронировать'}
                 </button>
             </div>
         </form>
