@@ -200,7 +200,6 @@ const ServiceList: React.FC = () => {
                                             </h3>
                                         </div>
                                     </div>
-                                    {}
                                     {galleryCount > 0 && (
                                         <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-white">
                                             📷 {galleryCount} фото
@@ -209,19 +208,22 @@ const ServiceList: React.FC = () => {
                                 </div>
 
                                 <div className="p-5">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-white/60">
-                                            <DollarSign className="w-4 h-4 text-green-400" />
-                                            <span className="text-sm">Стоимость:</span>
+                                    {}
+                                    <div className="flex items-center justify-between bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-3">
+                                        <div className="flex items-center gap-2">
+                                            <DollarSign className="w-5 h-5 text-green-400" />
+                                            <span className="text-sm font-medium text-white/80">Стоимость:</span>
                                         </div>
-                                        <span className="text-xl font-bold text-green-400">{servicePrice} BYN</span>
+                                        <span className="text-2xl font-extrabold text-green-400">
+                                            {servicePrice} BYN
+                                        </span>
                                     </div>
 
                                     {}
                                     <div className="mt-4 pt-3 border-t border-white/10">
-                                        <div className="flex items-center justify-between text-xs text-white/30">
-                                            <span>Доступно для заказа</span>
-                                            <span className="text-green-400">✓</span>
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className="text-white/40">Доступно для заказа</span>
+                                            <span className="text-green-400 font-semibold">✓ Доступно</span>
                                         </div>
                                     </div>
                                 </div>
@@ -252,9 +254,9 @@ const ServiceList: React.FC = () => {
                                 <img
                                     src={currentGallery[currentImageIndex].url}
                                     alt={currentGallery[currentImageIndex].title}
-                                    className="w-full h-96 object-contain bg-gray-100 rounded-lg"
+                                    className="w-full h-96 object-contain bg-gray-900 rounded-lg"
                                 />
-                                <p className="text-center text-sm text-gray-500 mt-2">
+                                <p className="text-center text-sm text-white/60 mt-2">
                                     {currentGallery[currentImageIndex].title}
                                 </p>
 
@@ -304,10 +306,10 @@ const ServiceList: React.FC = () => {
                             )}
 
                             {}
-                            <div className="bg-gray-50 rounded-lg p-4 mt-4">
+                            <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-4 mt-4 border border-green-500/30">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Стоимость услуги:</span>
-                                    <span className="text-2xl font-bold text-green-600">
+                                    <span className="text-white/80 font-medium">Стоимость услуги:</span>
+                                    <span className="text-2xl font-bold text-green-400">
                                         {ServiceTypePricesBYN[selectedService.serviceType]} BYN
                                     </span>
                                 </div>

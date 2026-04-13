@@ -254,7 +254,7 @@ const SessionList: React.FC = () => {
                     </div>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg shadow-rose-500/25"
+                        className="btn-primary flex items-center gap-2"
                     >
                         <Plus className="w-5 h-5" />
                         Создать фотосессию
@@ -275,13 +275,13 @@ const SessionList: React.FC = () => {
                                 placeholder="Поиск по клиенту, фотографу, услуге..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 bg-slate-800 border border-purple-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-rose-500"
+                                className="form-input pl-9"
                             />
                         </div>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-800 border border-purple-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-rose-500"
+                            className="form-input"
                         >
                             <option value="all">Все статусы</option>
                             <option value="upcoming">Запланированные</option>
@@ -291,7 +291,7 @@ const SessionList: React.FC = () => {
                         <select
                             value={serviceFilter}
                             onChange={(e) => setServiceFilter(e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-800 border border-purple-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-rose-500"
+                            className="form-input"
                         >
                             <option value="all">Все услуги</option>
                             {uniqueServices.map((service) => (
@@ -307,7 +307,7 @@ const SessionList: React.FC = () => {
                                     setStatusFilter('all');
                                     setServiceFilter('all');
                                 }}
-                                className="px-3 py-2 bg-rose-500/20 text-rose-400 rounded-lg hover:bg-rose-500/30 transition text-sm"
+                                className="btn-cancel"
                             >
                                 Сбросить фильтры
                             </button>
@@ -342,10 +342,10 @@ const SessionList: React.FC = () => {
                                                 Фотосессия #{sessionNumber}
                                             </h3>
                                             <div className="flex items-center gap-2 mt-1">
-                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${status.className}`}>
-                          <StatusIcon className="w-3 h-3" />
-                            {status.text}
-                        </span>
+                                                <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${status.className}`}>
+                                                    <StatusIcon className="w-3 h-3" />
+                                                    {status.text}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -402,7 +402,7 @@ const SessionList: React.FC = () => {
                         <p className="text-white/40 mb-4">Создайте первую фотосессию или измените параметры фильтрации</p>
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white px-5 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 mx-auto"
+                            className="btn-primary flex items-center gap-2 mx-auto"
                         >
                             <Plus className="w-4 h-4" />
                             Создать фотосессию
@@ -413,121 +413,123 @@ const SessionList: React.FC = () => {
                 {}
                 <AnimatePresence>
                     {isCreateModalOpen && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+                                className="bg-black border border-purple-500/30 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
                             >
-                                <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-                                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                        <Camera className="w-5 h-5 text-rose-500" />
+                                <div className="flex justify-between items-center p-6 border-b border-purple-500/30">
+                                    <h2 className="text-xl font-bold gradient-text flex items-center gap-2">
+                                        <Camera className="w-5 h-5 text-purple-400" />
                                         Создание фотосессии
                                     </h2>
                                     <button
                                         onClick={() => setIsCreateModalOpen(false)}
-                                        className="p-2 hover:bg-gray-100 rounded-full transition"
+                                        className="p-2 hover:bg-white/10 rounded-full transition"
                                     >
-                                        <X className="w-5 h-5 text-gray-500" />
+                                        <X className="w-5 h-5 text-white/60 hover:text-white" />
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleCreate} className="p-6 space-y-4">
-                                    <div>
-                                        <label htmlFor="createDate" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <Calendar className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Дата и время *
-                                        </label>
-                                        <input
-                                            id="createDate"
-                                            type="datetime-local"
-                                            required
-                                            value={formData.date}
-                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                            min={new Date().toISOString().slice(0, 16)}
-                                        />
-                                    </div>
+                                <form onSubmit={handleCreate} className="p-6">
+                                    <div className="booking-form">
+                                        <div className="form-group">
+                                            <label htmlFor="createDate" className="form-label">
+                                                <Calendar className="w-4 h-4 inline mr-1" />
+                                                Дата и время *
+                                            </label>
+                                            <input
+                                                id="createDate"
+                                                type="datetime-local"
+                                                required
+                                                value={formData.date}
+                                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                                className="form-input"
+                                                min={new Date().toISOString().slice(0, 16)}
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label htmlFor="createClientId" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <User className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Клиент *
-                                        </label>
-                                        <select
-                                            id="createClientId"
-                                            required
-                                            value={formData.clientId}
-                                            onChange={(e) => setFormData({ ...formData, clientId: Number.parseInt(e.target.value, 10) })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                        >
-                                            <option value={0}>Выберите клиента</option>
-                                            {clients?.map((client) => (
-                                                <option key={client.id} value={client.id}>
-                                                    {client.firstName} {client.lastName} - {client.phone}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        <div className="form-group">
+                                            <label htmlFor="createClientId" className="form-label">
+                                                <User className="w-4 h-4 inline mr-1" />
+                                                Клиент *
+                                            </label>
+                                            <select
+                                                id="createClientId"
+                                                required
+                                                value={formData.clientId}
+                                                onChange={(e) => setFormData({ ...formData, clientId: Number.parseInt(e.target.value, 10) })}
+                                                className="form-input"
+                                            >
+                                                <option value={0}>Выберите клиента</option>
+                                                {clients?.map((client) => (
+                                                    <option key={client.id} value={client.id}>
+                                                        {client.firstName} {client.lastName} - {client.phone}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div>
-                                        <label htmlFor="createPhotographerId" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <Camera className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Фотограф *
-                                        </label>
-                                        <select
-                                            id="createPhotographerId"
-                                            required
-                                            value={formData.photographerId}
-                                            onChange={(e) => setFormData({ ...formData, photographerId: Number.parseInt(e.target.value, 10) })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                        >
-                                            <option value={0}>Выберите фотографа</option>
-                                            {photographers?.map((photographer) => (
-                                                <option key={photographer.id} value={photographer.id}>
-                                                    {photographer.firstName} {photographer.lastName} - {photographer.hourlyRate} BYN/час
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        <div className="form-group">
+                                            <label htmlFor="createPhotographerId" className="form-label">
+                                                <Camera className="w-4 h-4 inline mr-1" />
+                                                Фотограф *
+                                            </label>
+                                            <select
+                                                id="createPhotographerId"
+                                                required
+                                                value={formData.photographerId}
+                                                onChange={(e) => setFormData({ ...formData, photographerId: Number.parseInt(e.target.value, 10) })}
+                                                className="form-input"
+                                            >
+                                                <option value={0}>Выберите фотографа</option>
+                                                {photographers?.map((photographer) => (
+                                                    <option key={photographer.id} value={photographer.id}>
+                                                        {photographer.firstName} {photographer.lastName} - {photographer.hourlyRate} BYN/час
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div>
-                                        <label htmlFor="createServiceId" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <Sparkles className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Услуга *
-                                        </label>
-                                        <select
-                                            id="createServiceId"
-                                            required
-                                            value={formData.serviceId}
-                                            onChange={(e) => setFormData({ ...formData, serviceId: Number.parseInt(e.target.value, 10) })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                        >
-                                            <option value={0}>Выберите услугу</option>
-                                            {services?.map((service) => (
-                                                <option key={service.id} value={service.id}>
-                                                    {getRussianServiceName(service.serviceType)} - {getServicePrice(service.id).toLocaleString()} BYN
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        <div className="form-group">
+                                            <label htmlFor="createServiceId" className="form-label">
+                                                <Sparkles className="w-4 h-4 inline mr-1" />
+                                                Услуга *
+                                            </label>
+                                            <select
+                                                id="createServiceId"
+                                                required
+                                                value={formData.serviceId}
+                                                onChange={(e) => setFormData({ ...formData, serviceId: Number.parseInt(e.target.value, 10) })}
+                                                className="form-input"
+                                            >
+                                                <option value={0}>Выберите услугу</option>
+                                                {services?.map((service) => (
+                                                    <option key={service.id} value={service.id}>
+                                                        {getRussianServiceName(service.serviceType)} - {getServicePrice(service.id).toLocaleString()} BYN
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div className="flex gap-3 justify-end pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCreateModalOpen(false)}
-                                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                                        >
-                                            Отмена
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={createMutation.isPending}
-                                            className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all disabled:opacity-50"
-                                        >
-                                            {createMutation.isPending ? 'Создание...' : 'Создать фотосессию'}
-                                        </button>
+                                        <div className="form-actions">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsCreateModalOpen(false)}
+                                                className="btn-cancel"
+                                            >
+                                                Отмена
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={createMutation.isPending}
+                                                className="btn-save"
+                                            >
+                                                {createMutation.isPending ? 'Создание...' : 'Создать фотосессию'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             </motion.div>
@@ -538,120 +540,122 @@ const SessionList: React.FC = () => {
                 {}
                 <AnimatePresence>
                     {isEditModalOpen && selectedSession && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+                                className="bg-black border border-purple-500/30 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
                             >
-                                <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-                                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                        <Pencil className="w-5 h-5 text-rose-500" />
+                                <div className="flex justify-between items-center p-6 border-b border-purple-500/30">
+                                    <h2 className="text-xl font-bold gradient-text flex items-center gap-2">
+                                        <Pencil className="w-5 h-5 text-purple-400" />
                                         Редактирование фотосессии
                                     </h2>
                                     <button
                                         onClick={() => setIsEditModalOpen(false)}
-                                        className="p-2 hover:bg-gray-100 rounded-full transition"
+                                        className="p-2 hover:bg-white/10 rounded-full transition"
                                     >
-                                        <X className="w-5 h-5 text-gray-500" />
+                                        <X className="w-5 h-5 text-white/60 hover:text-white" />
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleUpdate} className="p-6 space-y-4">
-                                    <div>
-                                        <label htmlFor="editDate" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <Calendar className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Дата и время *
-                                        </label>
-                                        <input
-                                            id="editDate"
-                                            type="datetime-local"
-                                            required
-                                            value={editFormData.date}
-                                            onChange={(e) => setEditFormData({ ...editFormData, date: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                        />
-                                    </div>
+                                <form onSubmit={handleUpdate} className="p-6">
+                                    <div className="booking-form">
+                                        <div className="form-group">
+                                            <label htmlFor="editDate" className="form-label">
+                                                <Calendar className="w-4 h-4 inline mr-1" />
+                                                Дата и время *
+                                            </label>
+                                            <input
+                                                id="editDate"
+                                                type="datetime-local"
+                                                required
+                                                value={editFormData.date}
+                                                onChange={(e) => setEditFormData({ ...editFormData, date: e.target.value })}
+                                                className="form-input"
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label htmlFor="editClientId" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <User className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Клиент *
-                                        </label>
-                                        <select
-                                            id="editClientId"
-                                            required
-                                            value={editFormData.clientId}
-                                            onChange={(e) => setEditFormData({ ...editFormData, clientId: Number.parseInt(e.target.value, 10) })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                        >
-                                            <option value={0}>Выберите клиента</option>
-                                            {clients?.map((client) => (
-                                                <option key={client.id} value={client.id}>
-                                                    {client.firstName} {client.lastName} - {client.phone}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        <div className="form-group">
+                                            <label htmlFor="editClientId" className="form-label">
+                                                <User className="w-4 h-4 inline mr-1" />
+                                                Клиент *
+                                            </label>
+                                            <select
+                                                id="editClientId"
+                                                required
+                                                value={editFormData.clientId}
+                                                onChange={(e) => setEditFormData({ ...editFormData, clientId: Number.parseInt(e.target.value, 10) })}
+                                                className="form-input"
+                                            >
+                                                <option value={0}>Выберите клиента</option>
+                                                {clients?.map((client) => (
+                                                    <option key={client.id} value={client.id}>
+                                                        {client.firstName} {client.lastName} - {client.phone}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div>
-                                        <label htmlFor="editPhotographerId" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <Camera className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Фотограф *
-                                        </label>
-                                        <select
-                                            id="editPhotographerId"
-                                            required
-                                            value={editFormData.photographerId}
-                                            onChange={(e) => setEditFormData({ ...editFormData, photographerId: Number.parseInt(e.target.value, 10) })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                        >
-                                            <option value={0}>Выберите фотографа</option>
-                                            {photographers?.map((photographer) => (
-                                                <option key={photographer.id} value={photographer.id}>
-                                                    {photographer.firstName} {photographer.lastName} - {photographer.hourlyRate} BYN/час
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        <div className="form-group">
+                                            <label htmlFor="editPhotographerId" className="form-label">
+                                                <Camera className="w-4 h-4 inline mr-1" />
+                                                Фотограф *
+                                            </label>
+                                            <select
+                                                id="editPhotographerId"
+                                                required
+                                                value={editFormData.photographerId}
+                                                onChange={(e) => setEditFormData({ ...editFormData, photographerId: Number.parseInt(e.target.value, 10) })}
+                                                className="form-input"
+                                            >
+                                                <option value={0}>Выберите фотографа</option>
+                                                {photographers?.map((photographer) => (
+                                                    <option key={photographer.id} value={photographer.id}>
+                                                        {photographer.firstName} {photographer.lastName} - {photographer.hourlyRate} BYN/час
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div>
-                                        <label htmlFor="editServiceId" className="block text-sm font-medium text-gray-700 mb-2">
-                                            <Sparkles className="w-4 h-4 inline mr-1 text-gray-500" />
-                                            Услуга *
-                                        </label>
-                                        <select
-                                            id="editServiceId"
-                                            required
-                                            value={editFormData.serviceId}
-                                            onChange={(e) => setEditFormData({ ...editFormData, serviceId: Number.parseInt(e.target.value, 10) })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                        >
-                                            <option value={0}>Выберите услугу</option>
-                                            {services?.map((service) => (
-                                                <option key={service.id} value={service.id}>
-                                                    {getRussianServiceName(service.serviceType)} - {getServicePrice(service.id).toLocaleString()} BYN
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        <div className="form-group">
+                                            <label htmlFor="editServiceId" className="form-label">
+                                                <Sparkles className="w-4 h-4 inline mr-1" />
+                                                Услуга *
+                                            </label>
+                                            <select
+                                                id="editServiceId"
+                                                required
+                                                value={editFormData.serviceId}
+                                                onChange={(e) => setEditFormData({ ...editFormData, serviceId: Number.parseInt(e.target.value, 10) })}
+                                                className="form-input"
+                                            >
+                                                <option value={0}>Выберите услугу</option>
+                                                {services?.map((service) => (
+                                                    <option key={service.id} value={service.id}>
+                                                        {getRussianServiceName(service.serviceType)} - {getServicePrice(service.id).toLocaleString()} BYN
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div className="flex gap-3 justify-end pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsEditModalOpen(false)}
-                                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                                        >
-                                            Отмена
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={updateMutation.isPending}
-                                            className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all disabled:opacity-50"
-                                        >
-                                            {updateMutation.isPending ? 'Сохранение...' : 'Сохранить изменения'}
-                                        </button>
+                                        <div className="form-actions">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsEditModalOpen(false)}
+                                                className="btn-cancel"
+                                            >
+                                                Отмена
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={updateMutation.isPending}
+                                                className="btn-save"
+                                            >
+                                                {updateMutation.isPending ? 'Сохранение...' : 'Сохранить изменения'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             </motion.div>

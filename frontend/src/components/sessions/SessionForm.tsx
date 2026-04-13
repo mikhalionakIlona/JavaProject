@@ -39,26 +39,27 @@ const SessionForm: React.FC<SessionFormProps> = ({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">Дата и время *</label>
+        <form onSubmit={handleSubmit} className="booking-form">
+            <div className="form-group">
+                <label htmlFor="date" className="form-label">Дата и время *</label>
                 <input
                     id="date"
                     type="datetime-local"
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="input-field"
+                    className="form-input"
                 />
             </div>
-            <div>
-                <label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-1">Клиент *</label>
+
+            <div className="form-group">
+                <label htmlFor="clientId" className="form-label">Клиент *</label>
                 <select
                     id="clientId"
                     required
                     value={formData.clientId}
                     onChange={(e) => setFormData({ ...formData, clientId: Number.parseInt(e.target.value, 10) })}
-                    className="input-field"
+                    className="form-input"
                 >
                     <option value={0}>Выберите клиента</option>
                     {clients.map((client) => (
@@ -68,31 +69,33 @@ const SessionForm: React.FC<SessionFormProps> = ({
                     ))}
                 </select>
             </div>
-            <div>
-                <label htmlFor="photographerId" className="block text-sm font-medium text-gray-700 mb-1">Фотограф *</label>
+
+            <div className="form-group">
+                <label htmlFor="photographerId" className="form-label">Фотограф *</label>
                 <select
                     id="photographerId"
                     required
                     value={formData.photographerId}
                     onChange={(e) => setFormData({ ...formData, photographerId: Number.parseInt(e.target.value, 10) })}
-                    className="input-field"
+                    className="form-input"
                 >
                     <option value={0}>Выберите фотографа</option>
                     {photographers.map((photographer) => (
                         <option key={photographer.id} value={photographer.id}>
-                            {photographer.firstName} {photographer.lastName} - {photographer.hourlyRate} ₽/час
+                            {photographer.firstName} {photographer.lastName} - {photographer.hourlyRate} BYN/час
                         </option>
                     ))}
                 </select>
             </div>
-            <div>
-                <label htmlFor="serviceId" className="block text-sm font-medium text-gray-700 mb-1">Услуга *</label>
+
+            <div className="form-group">
+                <label htmlFor="serviceId" className="form-label">Услуга *</label>
                 <select
                     id="serviceId"
                     required
                     value={formData.serviceId}
                     onChange={(e) => setFormData({ ...formData, serviceId: Number.parseInt(e.target.value, 10) })}
-                    className="input-field"
+                    className="form-input"
                 >
                     <option value={0}>Выберите услугу</option>
                     {services.map((service) => (
@@ -102,11 +105,12 @@ const SessionForm: React.FC<SessionFormProps> = ({
                     ))}
                 </select>
             </div>
-            <div className="flex gap-3 justify-end pt-4">
-                <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+
+            <div className="form-actions">
+                <button type="button" onClick={onCancel} className="btn-cancel">
                     Отмена
                 </button>
-                <button type="submit" disabled={isLoading} className="px-4 py-2 btn-primary">
+                <button type="submit" disabled={isLoading} className="btn-save">
                     {isLoading ? 'Сохранение...' : 'Создать'}
                 </button>
             </div>

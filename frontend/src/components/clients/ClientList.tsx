@@ -288,61 +288,66 @@ const ClientList: React.FC = () => {
                 )}
 
                 {}
+                {}
                 <Modal isOpen={isModalOpen} onClose={closeModal} title={editingId ? 'Редактирование клиента' : 'Добавление клиента'}>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">Имя *</label>
+                    <form onSubmit={handleSubmit} className="booking-form">
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label htmlFor="firstName" className="form-label">Имя *</label>
                                 <input
                                     id="firstName"
                                     type="text"
                                     required
                                     value={formData.firstName}
                                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"
+                                    className="form-input"
                                     placeholder="Иван"
                                 />
                             </div>
-                            <div>
-                                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Фамилия *</label>
+                            <div className="form-group">
+                                <label htmlFor="lastName" className="form-label">Фамилия *</label>
                                 <input
                                     id="lastName"
                                     type="text"
                                     required
                                     value={formData.lastName}
                                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"
+                                    className="form-input"
                                     placeholder="Иванов"
                                 />
                             </div>
                         </div>
-                        <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Телефон *</label>
+                        <div className="form-group">
+                            <label htmlFor="phone" className="form-label">Телефон *</label>
                             <input
                                 id="phone"
                                 type="tel"
                                 required
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"
+                                className="form-input"
                                 placeholder="+375291234567"
                             />
                         </div>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <div className="form-group">
+                            <label htmlFor="email" className="form-label">Email *</label>
                             <input
                                 id="email"
                                 type="email"
                                 required
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"
+                                className="form-input"
                                 placeholder="ivan@example.com"
                             />
                         </div>
-                        <div className="flex gap-3 justify-end pt-4">
-                            <button type="button" onClick={closeModal} className="px-4 py-2 bg-gray-200 rounded-lg">Отмена</button>
-                            <button type="submit" className="px-4 py-2 btn-primary">Сохранить</button>
+                        <div className="form-actions">
+                            <button type="button" onClick={closeModal} className="btn-cancel">
+                                Отмена
+                            </button>
+                            <button type="submit" className="btn-save" disabled={createMutation.isPending || updateMutation.isPending}>
+                                {createMutation.isPending || updateMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+                            </button>
                         </div>
                     </form>
                 </Modal>

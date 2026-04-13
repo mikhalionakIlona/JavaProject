@@ -1,6 +1,6 @@
 import React from 'react';
 import { PhotoService, ServiceTypePrices } from '../../types';
-import { CurrencyDollarIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { DollarSign, TrashIcon } from 'lucide-react';
 
 interface ServiceCardProps {
     service: PhotoService;
@@ -8,42 +8,76 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service, onDelete }) => {
+    const getServiceIcon = (serviceType: string) => {
+        const icons: Record<string, string> = {
+            WEDDING: '💍',
+            PORTRAIT: '👤',
+            PRODUCT: '📦',
+            CORPORATE: '🏢',
+            FAMILY: '👨‍👩‍👧‍👦',
+        };
+        return icons[serviceType] || '✨';
+    };
+
+    const getServiceColor = (serviceType: string) => {
+        const colors: Record<string, string> = {
+            WEDDING: 'from-pink-500 to-rose-500',
+            PORTRAIT: 'from-blue-500 to-cyan-500',
+            PRODUCT: 'from-green-500 to-emerald-500',
+            CORPORATE: 'from-purple-500 to-indigo-500',
+            FAMILY: 'from-orange-500 to-amber-500',
+        };
+        return colors[serviceType] || 'from-purple-500 to-pink-500';
+    };
+
+    const serviceIcon = getServiceIcon(service.serviceType);
+    const serviceColor = getServiceColor(service.serviceType);
+    const servicePrice = ServiceTypePrices[service.serviceType] || 0;
+
     return (
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-            <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center">
-                            <span className="text-xl">✨</span>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-800">{service.name}</h3>
-                            <p className="text-xs text-gray-400">ID: {service.id}</p>
-                        </div>
+        <div className="glass-card p-6 cursor-pointer group">
+            <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${serviceColor} rounded-xl flex items-center justify-center text-2xl shadow-lg`}>
+                        {serviceIcon}
                     </div>
-                    <button
-                        onClick={() => onDelete(service.id)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                        <TrashIcon className="w-4 h-4" />
-                    </button>
+                    <div>
+                        <h3 className="font-semibold text-white text-lg">
+                            {service.name}
+                        </h3>
+                        <p className="text-xs text-white/40">ID: {service.id}</p>
+                    </div>
+                </div>
+                <button
+                    onClick={() => onDelete(service.id)}
+                    className="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                >
+                    <TrashIcon className="w-4 h-4" />
+                </button>
+            </div>
+
+            <div className="space-y-2">
+                {}
+                <div className="flex items-center justify-between bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-green-400" />
+                        <span className="text-sm font-medium text-white/80">Базовая цена:</span>
+                    </div>
+                    <span className="text-xl font-bold text-green-400">
+                        {servicePrice} BYN
+                    </span>
                 </div>
 
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-gray-600">
-                        <CurrencyDollarIcon className="w-4 h-4 text-primary-500" />
-                        <span className="text-sm">Базовая цена: <strong>{ServiceTypePrices[service.serviceType]} ₽</strong></span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                        <span className="text-sm">Тип: <strong>{service.serviceType}</strong></span>
-                    </div>
+                <div className="flex items-center gap-2 text-white/60 pt-2">
+                    <span className="text-sm">Тип услуги:</span>
+                    <span className="text-sm font-semibold text-purple-400">{service.serviceType}</span>
                 </div>
+            </div>
 
-                <div className="mt-4 pt-3 border-t border-gray-100">
-                    <p className="text-xs text-gray-500">
-                        Фотографов: {service.photographers?.length || 0} | Фотосессий: {service.photoSessions?.length || 0}
-                    </p>
-                </div>
+            <div className="mt-4 pt-3 border-t border-white/10">
+                <p className="text-xs text-white/40">
+                    Фотографов: {service.photographers?.length || 0} | Фотосессий: {service.photoSessions?.length || 0}
+                </p>
             </div>
         </div>
     );

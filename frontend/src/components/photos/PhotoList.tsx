@@ -13,7 +13,7 @@ import {
     User,
     Camera,
     ZoomIn,
-    Upload
+    Upload,
 } from 'lucide-react';
 
 import svadba1 from '../../assets/svadba1.png';
@@ -42,12 +42,57 @@ const PHOTOS_BY_SERVICE: Record<string, string[]> = {
     'FAMILY': [family1, family2, family3],
 };
 
-const getPhotoForService = (serviceType: string, index: number): string => {
+// Ключ для localStorage
+const STORAGE_KEY = 'session_photo_index';
+
+// Функция для получения сохранённых индексов
+const getStoredIndexes = (): Record<number, number> => {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch (error) {
+        console.error('Error loading stored indexes:', error);
+    }
+    return {};
+};
+
+// Функция для сохранения индексов
+const saveStoredIndexes = (indexes: Record<number, number>) => {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(indexes));
+    } catch (error) {
+        console.error('Error saving indexes:', error);
+    }
+};
+
+// Получение фото для сессии с сохранением уникальности
+const getUniquePhotoForSession = (serviceType: string, sessionId: number): string => {
     const photos = PHOTOS_BY_SERVICE[serviceType];
     if (!photos || photos.length === 0) {
         return svadba1;
     }
-    return photos[index % photos.length];
+
+    const storedIndexes = getStoredIndexes();
+    let currentIndex = storedIndexes[sessionId] || 0;
+
+    // Получаем фото по текущему индексу
+    const photo = photos[currentIndex % photos.length];
+
+    // Увеличиваем индекс для следующего раза
+    currentIndex++;
+    storedIndexes[sessionId] = currentIndex;
+    saveStoredIndexes(storedIndexes);
+
+    return photo;
+};
+
+// Сброс индексов для конкретной сессии
+const resetSessionPhotoIndex = (sessionId: number) => {
+    const storedIndexes = getStoredIndexes();
+    delete storedIndexes[sessionId];
+    saveStoredIndexes(storedIndexes);
 };
 
 const getRussianServiceName = (englishName: string): string => {
@@ -104,7 +149,7 @@ const PhotoList: React.FC = () => {
 
     const deleteMutation = useMutation({
         mutationFn: photoService.delete,
-        onSuccess: async () => {
+        onSuccess: async (_, deletedId) => {
             await queryClient.invalidateQueries({ queryKey: ['photos'] });
             showSuccess('Фотография успешно удалена');
             setIsDeleteModalOpen(false);
@@ -161,6 +206,8 @@ const PhotoList: React.FC = () => {
             clientName: `${session.clientName} ${session.clientLastName}`,
             serviceName: getRussianServiceName(session.serviceName || ''),
             date: new Date(session.date).toLocaleDateString('ru-RU'),
+            serviceType: session.serviceName || 'WEDDING',
+            id: session.id,
         };
     };
 
@@ -178,34 +225,53 @@ const PhotoList: React.FC = () => {
         }
     };
 
-    const getDisplayPhotos = (): Photo[] => {
+    // Генерируем демо-фото на основе сессий с уникальными фото для каждой сессии
+    const getDemoPhotos = (): Photo[] => {
         if (!sessions || sessions.length === 0) return [];
 
-        if (photos && photos.length > 0) {
-            return photos;
-        }
+        // Счетчик для разных фото внутри одной сессии
+        const photoCountPerSession: Record<number, number> = {};
 
-        return sessions.map((session, idx) => {
+        // Для каждой сессии генерируем от 1 до 3 разных фото
+        const demoPhotos: Photo[] = [];
+
+        sessions.forEach((session) => {
             const serviceType = session.serviceName || 'WEDDING';
-            const photoPath = getPhotoForService(serviceType, idx);
-            return {
-                id: session.id,
-                fileName: `${getRussianServiceName(serviceType)}.png`,
-                filePath: photoPath,
-                uploadDate: new Date().toISOString(),
-                sessionId: session.id,
-            } as Photo;
+            const photosList = PHOTOS_BY_SERVICE[serviceType];
+
+            if (!photosList || photosList.length === 0) return;
+
+            // Определяем количество фото для этой сессии (от 1 до количества доступных фото)
+            const photosCount = Math.min(photosList.length, Math.floor(Math.random() * 3) + 1);
+
+            // Создаем уникальные фото для сессии
+            for (let i = 0; i < photosCount; i++) {
+                // Используем комбинацию ID сессии и индекса для выбора уникального фото
+                const photoIndex = (session.id * 7 + i * 3) % photosList.length;
+                const photoPath = photosList[photoIndex];
+
+                demoPhotos.push({
+                    id: session.id * 100 + i, // Уникальный ID
+                    fileName: `${getRussianServiceName(serviceType)}_${i + 1}.png`,
+                    filePath: photoPath,
+                    uploadDate: new Date(Date.now() - i * 86400000).toISOString(), // Разные даты
+                    sessionId: session.id,
+                } as Photo);
+            }
         });
+
+        return demoPhotos;
     };
 
-    const displayPhotos = getDisplayPhotos();
+    // Используем реальные фото если есть, иначе демо
+    const displayPhotos = (photos && photos.length > 0) ? photos : getDemoPhotos();
 
     if (isLoading) return <LoadingSpinner />;
 
     return (
         <div className="min-h-screen pt-20 px-4">
             <div className="container mx-auto">
-                {}
+                {/* Header */}
                 <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
@@ -215,32 +281,38 @@ const PhotoList: React.FC = () => {
                     </div>
                     <button
                         onClick={() => setIsUploadModalOpen(true)}
-                        className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg shadow-rose-500/25"
+                        className="btn-primary flex items-center gap-2"
+                        type="button"
                     >
                         <Upload className="w-5 h-5" />
                         Загрузить фото
                     </button>
                 </div>
 
-                {}
+                {/* Photos Grid */}
                 {displayPhotos.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {displayPhotos.map((photo, idx) => {
+                        {displayPhotos.map((photo) => {
                             const sessionInfo = getSessionInfo(photo.sessionId);
                             return (
-                                <motion.div
+                                <div
                                     key={photo.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    whileHover={{ y: -5 }}
                                     className="glass-card overflow-hidden cursor-pointer group"
                                     onClick={() => {
                                         setSelectedPhoto(photo);
                                         setIsViewModalOpen(true);
                                     }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            setSelectedPhoto(photo);
+                                            setIsViewModalOpen(true);
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                 >
-                                    {}
+                                    {/* Image */}
                                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-900/50 to-pink-900/50">
                                         <img
                                             src={photo.filePath}
@@ -252,7 +324,7 @@ const PhotoList: React.FC = () => {
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-                                        {}
+                                        {/* Action Buttons */}
                                         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={(e) => {
@@ -262,6 +334,7 @@ const PhotoList: React.FC = () => {
                                                 }}
                                                 className="p-2 bg-black/50 rounded-full hover:bg-black/70 transition"
                                                 title="Просмотр"
+                                                type="button"
                                             >
                                                 <ZoomIn className="w-4 h-4 text-white" />
                                             </button>
@@ -269,13 +342,14 @@ const PhotoList: React.FC = () => {
                                                 onClick={(e) => handleDeleteClick(photo, e)}
                                                 className="p-2 bg-red-500/70 rounded-full hover:bg-red-600 transition"
                                                 title="Удалить"
+                                                type="button"
                                             >
                                                 <Trash2 className="w-4 h-4 text-white" />
                                             </button>
                                         </div>
                                     </div>
 
-                                    {}
+                                    {/* Info */}
                                     <div className="p-4">
                                         <p className="font-semibold text-white text-sm truncate" title={photo.fileName}>
                                             {photo.fileName}
@@ -300,7 +374,7 @@ const PhotoList: React.FC = () => {
                                             </div>
                                         )}
                                     </div>
-                                </motion.div>
+                                </div>
                             );
                         })}
                     </div>
@@ -316,7 +390,8 @@ const PhotoList: React.FC = () => {
                         {sessions && sessions.length > 0 && (
                             <button
                                 onClick={() => setIsUploadModalOpen(true)}
-                                className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white px-5 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 mx-auto"
+                                className="btn-primary flex items-center gap-2 mx-auto"
+                                type="button"
                             >
                                 <Upload className="w-4 h-4" />
                                 Загрузить фото
@@ -325,7 +400,7 @@ const PhotoList: React.FC = () => {
                     </div>
                 )}
 
-                {}
+                {/* Upload Modal */}
                 <Modal
                     isOpen={isUploadModalOpen}
                     onClose={() => {
@@ -335,12 +410,23 @@ const PhotoList: React.FC = () => {
                     title="Загрузка фотографии"
                     size="md"
                 >
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label htmlFor="fileInput" className="block text-sm font-medium text-gray-700 mb-2">
+                    <form onSubmit={handleSubmit} className="booking-form">
+                        <div className="form-group">
+                            <label htmlFor="fileDropzone" className="form-label">
                                 Выберите файл *
                             </label>
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-rose-500 transition cursor-pointer">
+                            <div
+                                className="border-2 border-dashed border-purple-500/30 rounded-lg p-6 text-center hover:border-rose-500 transition cursor-pointer bg-slate-800/50"
+                                onClick={() => document.getElementById('fileInput')?.click()}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        document.getElementById('fileInput')?.click();
+                                    }
+                                }}
+                                role="button"
+                                tabIndex={0}
+                            >
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -348,26 +434,24 @@ const PhotoList: React.FC = () => {
                                     className="hidden"
                                     id="fileInput"
                                 />
-                                <label htmlFor="fileInput" className="cursor-pointer block">
-                                    {previewUrl ? (
-                                        <img
-                                            src={previewUrl}
-                                            alt="Preview"
-                                            className="max-h-48 mx-auto rounded-lg object-contain"
-                                        />
-                                    ) : (
-                                        <div className="py-8">
-                                            <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                                            <p className="text-gray-500">Нажмите или перетащите файл</p>
-                                            <p className="text-xs text-gray-400 mt-1">PNG, JPG, JPEG до 10MB</p>
-                                        </div>
-                                    )}
-                                </label>
+                                {previewUrl ? (
+                                    <img
+                                        src={previewUrl}
+                                        alt="Preview"
+                                        className="max-h-48 mx-auto rounded-lg object-contain"
+                                    />
+                                ) : (
+                                    <div className="py-8">
+                                        <Upload className="w-12 h-12 mx-auto text-purple-400 mb-2" />
+                                        <p className="text-white/60">Нажмите или перетащите файл</p>
+                                        <p className="text-xs text-white/40 mt-1">PNG, JPG, JPEG до 10MB</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div>
-                            <label htmlFor="fileName" className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="form-group">
+                            <label htmlFor="fileName" className="form-label">
                                 Название файла *
                             </label>
                             <input
@@ -376,13 +460,13 @@ const PhotoList: React.FC = () => {
                                 required
                                 value={formData.fileName}
                                 onChange={(e) => setFormData({ ...formData, fileName: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                className="form-input"
                                 placeholder="wedding_photo_001.jpg"
                             />
                         </div>
 
-                        <div>
-                            <label htmlFor="sessionId" className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="form-group">
+                            <label htmlFor="sessionId" className="form-label">
                                 Фотосессия *
                             </label>
                             <select
@@ -390,7 +474,7 @@ const PhotoList: React.FC = () => {
                                 required
                                 value={formData.sessionId}
                                 onChange={(e) => setFormData({ ...formData, sessionId: Number.parseInt(e.target.value, 10) })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                className="form-input"
                             >
                                 <option value={0}>Выберите фотосессию</option>
                                 {sessions?.map((session) => {
@@ -404,21 +488,21 @@ const PhotoList: React.FC = () => {
                             </select>
                         </div>
 
-                        <div className="flex gap-3 justify-end pt-4">
+                        <div className="form-actions">
                             <button
                                 type="button"
                                 onClick={() => {
                                     setIsUploadModalOpen(false);
                                     resetForm();
                                 }}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                className="btn-cancel"
                             >
                                 Отмена
                             </button>
                             <button
                                 type="submit"
                                 disabled={createMutation.isPending}
-                                className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all disabled:opacity-50"
+                                className="btn-save"
                             >
                                 {createMutation.isPending ? 'Добавление...' : 'Добавить'}
                             </button>
@@ -426,7 +510,7 @@ const PhotoList: React.FC = () => {
                     </form>
                 </Modal>
 
-                {}
+                {/* View Modal */}
                 <Modal
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
@@ -438,30 +522,31 @@ const PhotoList: React.FC = () => {
                             <img
                                 src={selectedPhoto.filePath}
                                 alt={selectedPhoto.fileName}
-                                className="w-full rounded-lg object-contain max-h-96"
+                                className="w-full rounded-lg object-contain max-h-96 bg-gray-900"
                                 onError={(e) => {
                                     (e.target as HTMLImageElement).src = svadba1;
                                 }}
                             />
-                            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                                <p><span className="font-medium text-gray-700">Название:</span> {selectedPhoto.fileName}</p>
-                                <p><span className="font-medium text-gray-700">Дата загрузки:</span> {formatDate(selectedPhoto.uploadDate)}</p>
-                                <p><span className="font-medium text-gray-700">Фотосессия:</span> #{selectedPhoto.sessionId}</p>
+                            <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg p-4 space-y-2 border border-purple-500/30">
+                                <p className="text-white"><span className="text-white/60">Название:</span> {selectedPhoto.fileName}</p>
+                                <p className="text-white"><span className="text-white/60">Дата загрузки:</span> {formatDate(selectedPhoto.uploadDate)}</p>
+                                <p className="text-white"><span className="text-white/60">Фотосессия:</span> #{selectedPhoto.sessionId}</p>
                                 {(() => {
                                     const sessionInfo = getSessionInfo(selectedPhoto.sessionId);
                                     return sessionInfo ? (
                                         <>
-                                            <p><span className="font-medium text-gray-700">Клиент:</span> {sessionInfo.clientName}</p>
-                                            <p><span className="font-medium text-gray-700">Услуга:</span> {sessionInfo.serviceName}</p>
-                                            <p><span className="font-medium text-gray-700">Дата съемки:</span> {sessionInfo.date}</p>
+                                            <p className="text-white"><span className="text-white/60">Клиент:</span> {sessionInfo.clientName}</p>
+                                            <p className="text-white"><span className="text-white/60">Услуга:</span> {sessionInfo.serviceName}</p>
+                                            <p className="text-white"><span className="text-white/60">Дата съемки:</span> {sessionInfo.date}</p>
                                         </>
                                     ) : null;
                                 })()}
                             </div>
-                            <div className="flex gap-3 justify-end">
+                            <div className="form-actions">
                                 <button
                                     onClick={() => setIsViewModalOpen(false)}
-                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                    className="btn-cancel"
+                                    type="button"
                                 >
                                     Закрыть
                                 </button>
@@ -473,7 +558,8 @@ const PhotoList: React.FC = () => {
                                             setIsDeleteModalOpen(true);
                                         }
                                     }}
-                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                    className="btn-save"
+                                    type="button"
                                 >
                                     Удалить
                                 </button>
@@ -482,7 +568,7 @@ const PhotoList: React.FC = () => {
                     )}
                 </Modal>
 
-                {}
+                {/* Delete Modal */}
                 <Modal
                     isOpen={isDeleteModalOpen}
                     onClose={() => {
@@ -493,33 +579,35 @@ const PhotoList: React.FC = () => {
                     size="sm"
                 >
                     <div className="space-y-4">
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <p className="text-red-800 font-medium">
+                        <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+                            <p className="text-red-400 font-medium">
                                 Вы уверены, что хотите удалить эту фотографию?
                             </p>
                             {photoToDelete && (
-                                <p className="text-sm text-red-600 mt-2">
+                                <p className="text-sm text-red-300 mt-2">
                                     {photoToDelete.fileName}
                                 </p>
                             )}
-                            <p className="text-xs text-red-500 mt-2">
+                            <p className="text-xs text-red-400/70 mt-2">
                                 Это действие нельзя отменить.
                             </p>
                         </div>
-                        <div className="flex gap-3 justify-end">
+                        <div className="form-actions">
                             <button
                                 onClick={() => {
                                     setIsDeleteModalOpen(false);
                                     setPhotoToDelete(null);
                                 }}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                className="btn-cancel"
+                                type="button"
                             >
                                 Отмена
                             </button>
                             <button
                                 onClick={confirmDelete}
                                 disabled={deleteMutation.isPending}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50"
+                                className="btn-save"
+                                type="button"
                             >
                                 {deleteMutation.isPending ? 'Удаление...' : 'Удалить'}
                             </button>

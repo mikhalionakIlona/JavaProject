@@ -25,55 +25,58 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ sessions, onUpload, isLoading
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-                <PhotoIcon className="w-5 h-5 text-primary-500" />
-                <h3 className="text-lg font-semibold text-gray-800">Загрузить фотографию</h3>
+        <form onSubmit={handleSubmit} className="booking-form glass-card p-6">
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-purple-500/30">
+                <PhotoIcon className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold gradient-text">Загрузить фотографию</h3>
             </div>
 
-            <div className="space-y-4">
-                <div>
-                    <label htmlFor="fileName" className="block text-sm font-medium text-gray-700 mb-1">Название файла *</label>
-                    <input
-                        id="fileName"
-                        type="text"
-                        required
-                        value={formData.fileName}
-                        onChange={(e) => setFormData({ ...formData, fileName: e.target.value })}
-                        className="input-field"
-                        placeholder="wedding_photo_001.jpg"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="filePath" className="block text-sm font-medium text-gray-700 mb-1">Путь к файлу (URL) *</label>
-                    <input
-                        id="filePath"
-                        type="text"
-                        required
-                        value={formData.filePath}
-                        onChange={(e) => setFormData({ ...formData, filePath: e.target.value })}
-                        className="input-field"
-                        placeholder="https://example.com/photos/photo.jpg"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="sessionId" className="block text-sm font-medium text-gray-700 mb-1">Фотосессия *</label>
-                    <select
-                        id="sessionId"
-                        required
-                        value={formData.sessionId}
-                        onChange={(e) => setFormData({ ...formData, sessionId: Number.parseInt(e.target.value, 10) })}
-                        className="input-field"
-                    >
-                        <option value={0}>Выберите фотосессию</option>
-                        {sessions.map((session) => (
-                            <option key={session.id} value={session.id}>
-                                #{session.id} - {session.clientName} {session.clientLastName} - {new Date(session.date).toLocaleDateString()}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <button type="submit" disabled={isLoading} className="w-full btn-primary">
+            <div className="form-group">
+                <label htmlFor="fileName" className="form-label">Название файла *</label>
+                <input
+                    id="fileName"
+                    type="text"
+                    required
+                    value={formData.fileName}
+                    onChange={(e) => setFormData({ ...formData, fileName: e.target.value })}
+                    className="form-input"
+                    placeholder="wedding_photo_001.jpg"
+                />
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="filePath" className="form-label">Путь к файлу (URL) *</label>
+                <input
+                    id="filePath"
+                    type="text"
+                    required
+                    value={formData.filePath}
+                    onChange={(e) => setFormData({ ...formData, filePath: e.target.value })}
+                    className="form-input"
+                    placeholder="https://example.com/photos/photo.jpg"
+                />
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="sessionId" className="form-label">Фотосессия *</label>
+                <select
+                    id="sessionId"
+                    required
+                    value={formData.sessionId}
+                    onChange={(e) => setFormData({ ...formData, sessionId: Number.parseInt(e.target.value, 10) })}
+                    className="form-input"
+                >
+                    <option value={0}>Выберите фотосессию</option>
+                    {sessions.map((session) => (
+                        <option key={session.id} value={session.id}>
+                            #{session.id} - {session.clientName} {session.clientLastName} - {new Date(session.date).toLocaleDateString()}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="form-actions">
+                <button type="submit" disabled={isLoading} className="btn-save w-full justify-center">
                     {isLoading ? 'Загрузка...' : 'Загрузить фото'}
                 </button>
             </div>
