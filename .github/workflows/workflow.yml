@@ -28,7 +28,7 @@ jobs:
         run: mvn -B clean package -DskipTests
 
       - name: Run tests (ignore failures)
-        run: mvn -B test  true
+        run: mvn -B test || true
 
       - name: Print test reports
         run: |
@@ -77,7 +77,6 @@ jobs:
     steps:
       - name: Check health endpoint
         run: |
-          # как в restaurant — пропуск если нет URL
           if [ -z "$APP_BASE_URL" ]; then
             echo "APP_BASE_URL is empty, skipping healthcheck"
             exit 0
@@ -86,7 +85,7 @@ jobs:
           HEALTH_URL="${APP_BASE_URL%/}/actuator/health"
 
           for attempt in {1..20}; do
-            status=$(curl --silent --output response.json --write-out "%{http_code}" "$HEALTH_URL"  echo "000")
+            status=$(curl --silent --output response.json --write-out "%{http_code}" "$HEALTH_URL" || echo "000")
 
             if [ "$status" = "200" ] && grep -q '"status":"UP"' response.json; then
               cat response.json
