@@ -7,7 +7,7 @@ on:
 
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/photostudio:latest
-  APP_BASE_URL: http://javaproject-production-f54b.up.railway.app
+  APP_BASE_URL: https://javaproject-production-f54b.up.railway.app
 
 jobs:
 
