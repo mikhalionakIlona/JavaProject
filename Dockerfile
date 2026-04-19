@@ -2,11 +2,10 @@ FROM node:20 AS frontend-build
 WORKDIR /app/frontend
 
 COPY frontend/package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY frontend/ ./
 RUN npm run build
-
 
 FROM maven:3.9-eclipse-temurin-21 AS backend-build
 WORKDIR /app
