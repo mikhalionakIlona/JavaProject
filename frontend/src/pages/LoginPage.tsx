@@ -31,12 +31,22 @@ const LoginPage: React.FC = () => {
     }, [isAuthenticated, user, isLoading, navigate]);
 
     const cleanPhoneNumber = (value: string) => {
-        return value.replaceAll(/\D/g, '');
+        const hasPlus = value.startsWith('+');
+        const cleaned = value.replace(/[^\d]/g, '');
+        return hasPlus ? `+${cleaned}` : cleaned;
     };
 
+
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const cleaned = cleanPhoneNumber(e.target.value);
-        const limited = cleaned.slice(0, 12);
+        let value = e.target.value;
+
+        if (value.includes('+') && value.indexOf('+') !== 0) {
+            value = value.replace(/\+/g, '');
+        }
+
+        const cleaned = cleanPhoneNumber(value);
+        const maxLength = 13;
+        const limited = cleaned.slice(0, maxLength);
         setFormData({ ...formData, phone: limited });
     };
 
@@ -61,12 +71,12 @@ const LoginPage: React.FC = () => {
                     toast.success(`Добро пожаловать, ${userData.name}!`);
                     navigate('/user/dashboard');
                 }
-                else if (formData.phone === '375441234567' && formData.password === 'admin') {
+                else if (formData.phone === '+375441234567' && formData.password === 'admin') {
                     const adminUser = {
                         id: 0,
                         name: 'Администратор',
                         email: 'admin@photostudio.com',
-                        phone: '375441234567',
+                        phone: '+375441234567',
                         role: 'admin' as const
                     };
                     login(adminUser, 'mock-token');
@@ -229,7 +239,7 @@ const LoginPage: React.FC = () => {
                                 value={formData.phone}
                                 onChange={handlePhoneChange}
                                 className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500 transition-all"
-                                placeholder="375441234567"
+                                placeholder="+375441234567"
                             />
                         </div>
 
